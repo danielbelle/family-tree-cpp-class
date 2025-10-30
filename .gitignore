@@ -1,0 +1,16 @@
+*.exe
+*.vscode
+build/
+*.o
+*.obj
+*.dll
+*.so
+*.dylib
+*.out
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+export.txt
+export.ps1
