@@ -10,6 +10,24 @@ void configurarUTF8() {
 #endif
 }
 
+// Função para verificar se deve continuar (incluindo tratamento do botão X)
+bool deveContinuar(const string& opcao) {
+  // Se a opção for "0", sair
+  if (opcao == "0") {
+    return false;
+  }
+
+  // Verificar se é um número válido entre 1-4
+  try {
+    int opcaoNum = stoi(opcao);
+    return (opcaoNum >= 1 && opcaoNum <= 4);
+  }
+  catch (const exception&) {
+    // Se não é número, é inválido mas continua (será tratado como inválido)
+    return true;
+  }
+}
+
 void exibirMenu() {
   limparTela();
   cout << "===================================" << endl;
@@ -19,10 +37,7 @@ void exibirMenu() {
   cout << "2 - Criar Família" << endl;
   cout << "3 - Criar Árvore Genealógica" << endl;
   cout << "4 - Listar Pessoas" << endl;
-  cout << "5 - SALVAR BANCO (arquivo único)" << endl;
-  cout << "6 - CARREGAR BANCO (arquivo único)" << endl;
-  cout << "7 - Listar Árvores Salvas" << endl;
-  cout << "0 - SAIR" << endl;
+  cout << "0 - SAIR (ou use o botão X)" << endl;  // ← Adicionei esta informação
   cout << "===================================" << endl;
   cout << "Pessoas cadastradas: " << pessoasGlobal.size() << endl;
   cout << "Árvores criadas: " << arvoresGlobal.size() << endl;
@@ -78,36 +93,14 @@ void processarOpcao(const string& opcao) {
     listarPessoas();
     break;
 
-  case 5:
-    salvarArquivoUnico();
-    break;
-
-  case 6:
-    carregarArquivoUnico();
-    break;
-
-  case 7:
-    listarArvoresSalvasInterface();
-    break;
-
   default:
     cout << "❌ Opção inválida: '" << opcao << "'" << endl;
-    cout << "Por favor, escolha uma opção entre 0 e 7." << endl;
+    cout << "Por favor, escolha uma opção entre 0 e 4." << endl;
     break;
   }
 
   // Pausar apenas se não for sair
   if (opcaoNum != 0) {
     pausar();
-  }
-}
-
-bool deveContinuar(const string& opcao) {
-  // Converter para número e verificar se é 0
-  try {
-    return stoi(opcao) != 0;
-  }
-  catch (const exception&) {
-    return true; // Se não é número, continua (será tratado como inválido)
   }
 }

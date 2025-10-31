@@ -15,9 +15,4 @@ namespace execucao {
   void listarPessoas();
   void limparTela();
   void pausar();
-  void salvarArquivoUnico(); // Nova função
-  void carregarArquivoUnico(); // Nova função
-  void salvarArvoreInterface();
-  void carregarArvoreInterface();
-  void listarArvoresSalvasInterface();
 }

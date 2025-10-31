@@ -10,15 +10,11 @@
 #include <cstdlib>
 #include <queue>
 #include <fstream>
-#include <filesystem>
 
 // Windows API
 #ifdef _WIN32
 #include <windows.h>
 #endif
-
-// JSON library (single header)
-#include "../json/json.hpp"
 
 // Headers do projeto
 #include "../core/estruturas.hpp"
@@ -26,3 +22,6 @@
 #include "../core/operacoes.hpp"
 #include "../core/execucao.hpp"
 #include "../core/persistencia.hpp"
+
+// Bibliotecas externas
+  

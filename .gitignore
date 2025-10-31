@@ -1,6 +1,7 @@
 *.exe
 *.vscode
 build/
+compile_vars.tmp
 *.o
 *.obj
 *.dll
@@ -15,3 +16,6 @@ build/
 export.txt
 export.ps1
 main-backup.cpp
+family_tree.exe
+data/
+compilebackup.bat
