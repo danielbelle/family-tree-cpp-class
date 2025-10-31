@@ -9,7 +9,7 @@ taskkill /f /im family_tree.exe >nul 2>&1
 :: COMPILAÇÃO COM PRE-COMPILED HEADERS
 :: ================================================
 
-echo [1/4] Gerando Precompiled Header...
+echo [1/5] Gerando Precompiled Header...
 g++ -std=c++17 -Iinclude -c include/pch/pch.cpp -o build/pch.o
 
 if %errorlevel% neq 0 (
@@ -18,7 +18,7 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-echo [2/4] Compilando main.cpp...
+echo [2/5] Compilando main.cpp...
 g++ -std=c++17 -Iinclude -include pch/pch.hpp -c src/main.cpp -o build/main.o
 
 if %errorlevel% neq 0 (
@@ -27,7 +27,7 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-echo [3/4] Compilando interface.cpp...
+echo [3/5] Compilando interface.cpp...
 g++ -std=c++17 -Iinclude -include pch/pch.hpp -c src/interface.cpp -o build/interface.o
 
 if %errorlevel% neq 0 (
@@ -36,8 +36,26 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-echo [4/4] Linkando executável...
-g++ -o build/family_tree.exe build/main.o build/interface.o build/pch.o
+echo [4/5] Compilando execucao.cpp...
+g++ -std=c++17 -Iinclude -include pch/pch.hpp -c src/execucao.cpp -o build/execucao.o
+
+if %errorlevel% neq 0 (
+    echo ERRO: Falha ao compilar execucao.cpp!
+    pause
+    exit /b 1
+)
+
+echo [5/5] Compilando operacoes.cpp...
+g++ -std=c++17 -Iinclude -include pch/pch.hpp -c src/operacoes.cpp -o build/operacoes.o
+
+if %errorlevel% neq 0 (
+    echo ERRO: Falha ao compilar operacoes.cpp!
+    pause
+    exit /b 1
+)
+
+echo [6/6] Linkando executável...
+g++ -o build/family_tree.exe build/main.o build/interface.o build/execucao.o build/operacoes.o build/pch.o
 
 :: ================================================
 :: VERIFICAÇÃO E EXECUÇÃO

@@ -1,8 +1,7 @@
 #include "pch/pch.hpp"
+#include "core/execucao.hpp"
 
-using namespace std;
-using namespace arvore;
-
+using namespace execucao;
 
 void configurarUTF8() {
 #ifdef _WIN32
@@ -12,29 +11,62 @@ void configurarUTF8() {
 }
 
 void exibirMenu() {
+  limparTela();
   cout << "===================================" << endl;
-  cout << "      ARVORE GENEALOGICA C++" << endl;
+  cout << "      ÁRVORE GENEALÓGICA C++" << endl;
   cout << "===================================" << endl;
-  cout << "Projeto de Arvore Genealogica em C++17" << endl;
-  cout << endl;
-  cout << "Digite 0 para SAIR e FECHAR" << endl;
-  cout << "Digite qualquer outra coisa para continuar" << endl;
+  cout << "1 - Criar Pessoa" << endl;
+  cout << "2 - Criar Família" << endl;
+  cout << "3 - Criar Árvore Genealógica" << endl;
+  cout << "4 - Listar Pessoas" << endl;
+  cout << "0 - SAIR" << endl;
   cout << "===================================" << endl;
-  cout << "Opcao: ";
+  cout << "Pessoas cadastradas: " << pessoasGlobal.size() << endl;
+  cout << "Árvore: " << (arvoreGlobal ? "Criada" : "Não criada") << endl;
+  cout << "===================================" << endl;
+  cout << "Opção: ";
 }
 
 void processarOpcao(const string& opcao) {
   cout << endl;
-  cout << "+++++++++++++++++++++++++++++++++++" << endl;
-  cout << "RESULTADO:" << endl;
-  cout << "Voce digitou: '" << opcao << "'" << endl;
-  cout << "Estruturas carregadas com sucesso!" << endl;
-  cout << "+++++++++++++++++++++++++++++++++++" << endl;
-  cout << endl;
 
-  // Pequena pausa para ler o resultado
-  system("timeout 1 > nul");
-}
+  if (opcao == "1") {
+    Pessoa* novaPessoa = criarPessoaInterface();
+    if (novaPessoa) {
+      cout << "✅ Operação concluída com sucesso!" << endl;
+    }
+    else {
+      cout << "❌ Falha ao criar pessoa!" << endl;
+    }
+  }
+  else if (opcao == "2") {
+    Familia* novaFamilia = criarFamiliaInterface();
+    if (novaFamilia) {
+      cout << "✅ Operação concluída com sucesso!" << endl;
+    }
+    else {
+      cout << "❌ Falha ao criar família!" << endl;
+    }
+  }
+  else if (opcao == "3") {
+    criarArvoreInterface();
+    cout << "✅ Operação concluída com sucesso!" << endl;
+  }
+  else if (opcao == "4") {
+    listarPessoas();
+  }
+  else if (opcao == "0") {
+    cout << "Saindo do programa..." << endl;
+  }
+  else {
+    cout << "❌ Opção inválida: '" << opcao << "'" << endl;
+    cout << "Por favor, escolha uma opção entre 0 e 4." << endl;
+  }
+
+  if (opcao != "0") {
+    pausar();
+  }
+  }
 
 bool deveContinuar(const string& opcao) {
   return opcao != "0";

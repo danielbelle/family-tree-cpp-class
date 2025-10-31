@@ -1,8 +1,5 @@
 #include "pch/pch.hpp"
 
-using namespace std;
-using namespace arvore;
-
 int main() {
   configurarUTF8();
 
@@ -19,7 +16,6 @@ int main() {
     processarOpcao(opcao);
   }
 
-  cout << endl;
   cout << "Fechando programa..." << endl;
 
   return 0;
