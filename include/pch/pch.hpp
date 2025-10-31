@@ -18,6 +18,6 @@
 #include <windows.h>
 #endif
 
-// Headers do projeto
-#include "include/estruturas.hpp"
-#include "include/main.hpp"
+// Headers do projeto (caminhos relativos)
+#include "../core/estruturas.hpp"
+#include "../core/main.hpp"
