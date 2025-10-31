@@ -1,10 +1,16 @@
 #include "pch/pch.hpp"
 
-namespace execucao {
+using namespace std;
+using namespace arvore;
 
-  // Definição das variáveis globais
-  ArvoreGenealogica* arvoreGlobal = nullptr;
+// Definição das variáveis globais dentro do namespace
+namespace execucao {
+  vector<ArvoreGenealogica*> arvoresGlobal;
   unordered_map<string, Pessoa*> pessoasGlobal;
+}
+
+// Implementações das funções dentro do namespace
+namespace execucao {
 
   void limparTela() {
 #ifdef _WIN32
@@ -55,8 +61,9 @@ namespace execucao {
     Pessoa* novaPessoa = criarPessoa(nome, dataNascimento, genero);
     pessoasGlobal[nome] = novaPessoa;
 
-    if (arvoreGlobal) {
-      arvoreGlobal->indicePessoas[nome] = novaPessoa;
+    // Adicionar pessoa a todas as árvores existentes
+    for (auto& arvore : arvoresGlobal) {
+      arvore->indicePessoas[nome] = novaPessoa;
     }
 
     cout << "✅ Pessoa criada com sucesso!" << endl;
@@ -136,19 +143,18 @@ namespace execucao {
   void criarArvoreInterface() {
     cout << "=== CRIAR ÁRVORE GENEALÓGICA ===" << endl;
 
-    if (arvoreGlobal != nullptr) {
-      cout << "❌ Erro: Já existe uma árvore genealógica ativa" << endl;
-      return;
-    }
+    ArvoreGenealogica* novaArvore = criarArvore();
 
-    arvoreGlobal = criarArvore();
-
+    // Adicionar pessoas existentes à nova árvore
     for (auto& par : pessoasGlobal) {
-      arvoreGlobal->indicePessoas[par.first] = par.second;
+      novaArvore->indicePessoas[par.first] = par.second;
     }
+
+    arvoresGlobal.push_back(novaArvore);
 
     cout << "✅ Árvore genealógica criada com sucesso!" << endl;
-    cout << "Total de pessoas na árvore: " << arvoreGlobal->indicePessoas.size() << endl;
+    cout << "Total de árvores: " << arvoresGlobal.size() << endl;
+    cout << "Pessoas na árvore: " << novaArvore->indicePessoas.size() << endl;
   }
 
   void listarPessoas() {
@@ -171,4 +177,125 @@ namespace execucao {
     cout << "Total: " << pessoasGlobal.size() << " pessoas" << endl;
   }
 
-} // namespace execucao
+  void salvarArquivoUnico() {
+    cout << "=== SALVAR BANCO DE DADOS ===" << endl;
+
+    if (persistencia::salvarBancoDeDados(arvoresGlobal, pessoasGlobal)) {
+      cout << "✅ Banco de dados salvo com sucesso em data/armazenamento.json" << endl;
+      cout << "   Árvores salvas: " << arvoresGlobal.size() << endl;
+      cout << "   Pessoas salvas: " << pessoasGlobal.size() << endl;
+    }
+    else {
+      cout << "❌ Falha ao salvar banco de dados" << endl;
+    }
+  }
+
+  void carregarArquivoUnico() {
+    cout << "=== CARREGAR BANCO DE DADOS ===" << endl;
+
+    if (persistencia::carregarBancoDeDados(arvoresGlobal, pessoasGlobal)) {
+      cout << "✅ Banco de dados carregado com sucesso!" << endl;
+      cout << "   Árvores: " << arvoresGlobal.size() << endl;
+      cout << "   Pessoas: " << pessoasGlobal.size() << endl;
+    }
+    else {
+      cout << "❌ Nenhum banco de dados encontrado ou erro ao carregar" << endl;
+    }
+  }
+
+  void salvarArvoreInterface() {
+    cout << "=== SALVAR ÁRVORE (Compatibilidade) ===" << endl;
+
+    if (arvoresGlobal.empty()) {
+      cout << "❌ Erro: Nenhuma árvore para salvar" << endl;
+      return;
+    }
+
+    string nomeArquivo;
+    cout << "Nome para salvar a árvore: ";
+    getline(cin, nomeArquivo);
+
+    if (nomeArquivo.empty()) {
+      cout << "❌ Erro: Nome não pode ser vazio" << endl;
+      return;
+    }
+
+    // Usar a primeira árvore para compatibilidade
+    if (persistencia::salvarArvore(arvoresGlobal[0], nomeArquivo)) {
+      cout << "✅ Árvore salva com sucesso!" << endl;
+    }
+    else {
+      cout << "❌ Falha ao salvar árvore" << endl;
+    }
+  }
+
+  void carregarArvoreInterface() {
+    cout << "=== CARREGAR ÁRVORE (Compatibilidade) ===" << endl;
+
+    vector<string> arvores = persistencia::listarArvoresSalvas();
+
+    if (arvores.empty()) {
+      cout << "Nenhuma árvore salva encontrada." << endl;
+      return;
+    }
+
+    cout << "Árvores disponíveis:" << endl;
+    for (size_t i = 0; i < arvores.size(); i++) {
+      cout << i + 1 << " - " << arvores[i] << endl;
+    }
+
+    cout << "0 - Cancelar" << endl;
+    cout << "Escolha uma árvore: ";
+
+    int escolha;
+    cin >> escolha;
+    cin.ignore();
+
+    if (escolha == 0) return;
+
+    if (escolha < 1 || escolha > static_cast<int>(arvores.size())) {
+      cout << "❌ Escolha inválida" << endl;
+      return;
+    }
+
+    string nomeArvore = arvores[escolha - 1];
+
+    // Limpar árvores atuais
+    for (auto arvore : arvoresGlobal) {
+      delete arvore;
+    }
+    arvoresGlobal.clear();
+    pessoasGlobal.clear();
+
+    // Carregar nova árvore
+    ArvoreGenealogica* arvoreCarregada = persistencia::carregarArvore(nomeArvore);
+
+    if (arvoreCarregada) {
+      arvoresGlobal.push_back(arvoreCarregada);
+
+      // Popular pessoas globais a partir da árvore carregada
+      for (const auto& par : arvoreCarregada->indicePessoas) {
+        pessoasGlobal[par.first] = par.second;
+      }
+      cout << "✅ Árvore carregada com sucesso!" << endl;
+    }
+  }
+
+  void listarArvoresSalvasInterface() {
+    cout << "=== ÁRVORES SALVAS ===" << endl;
+
+    vector<string> arvores = persistencia::listarArvoresSalvas();
+
+    if (arvores.empty()) {
+      cout << "Nenhuma árvore salva encontrada." << endl;
+      return;
+    }
+
+    cout << "Árvores no banco de dados:" << endl;
+    for (const auto& nome : arvores) {
+      cout << "📁 " << nome << ".json" << endl;
+    }
+    cout << "Total: " << arvores.size() << " árvores" << endl;
+  }
+
+}

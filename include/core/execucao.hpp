@@ -4,16 +4,20 @@
 
 namespace execucao {
 
-  // Variáveis globais
-  extern ArvoreGenealogica* arvoreGlobal;
-  extern unordered_map<string, Pessoa*> pessoasGlobal;
+  // Declaração das variáveis globais
+  extern vector<arvore::ArvoreGenealogica*> arvoresGlobal;
+  extern std::unordered_map<std::string, arvore::Pessoa*> pessoasGlobal;
 
   // Operações
-  Pessoa* criarPessoaInterface();
-  Familia* criarFamiliaInterface();
+  arvore::Pessoa* criarPessoaInterface();
+  arvore::Familia* criarFamiliaInterface();
   void criarArvoreInterface();
   void listarPessoas();
   void limparTela();
   void pausar();
-
-} // namespace execucao
+  void salvarArquivoUnico(); // Nova função
+  void carregarArquivoUnico(); // Nova função
+  void salvarArvoreInterface();
+  void carregarArvoreInterface();
+  void listarArvoresSalvasInterface();
+}

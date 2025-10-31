@@ -19,10 +19,13 @@ void exibirMenu() {
   cout << "2 - Criar Família" << endl;
   cout << "3 - Criar Árvore Genealógica" << endl;
   cout << "4 - Listar Pessoas" << endl;
+  cout << "5 - SALVAR BANCO (arquivo único)" << endl;
+  cout << "6 - CARREGAR BANCO (arquivo único)" << endl;
+  cout << "7 - Listar Árvores Salvas" << endl;
   cout << "0 - SAIR" << endl;
   cout << "===================================" << endl;
   cout << "Pessoas cadastradas: " << pessoasGlobal.size() << endl;
-  cout << "Árvore: " << (arvoreGlobal ? "Criada" : "Não criada") << endl;
+  cout << "Árvores criadas: " << arvoresGlobal.size() << endl;
   cout << "===================================" << endl;
   cout << "Opção: ";
 }
@@ -30,7 +33,21 @@ void exibirMenu() {
 void processarOpcao(const string& opcao) {
   cout << endl;
 
-  if (opcao == "1") {
+  // Converter string para int para usar no switch
+  int opcaoNum;
+  try {
+    opcaoNum = stoi(opcao);
+  }
+  catch (const exception&) {
+    opcaoNum = -1; // Opção inválida
+  }
+
+  switch (opcaoNum) {
+  case 0:
+    cout << "Saindo do programa..." << endl;
+    break;
+
+  case 1: {
     Pessoa* novaPessoa = criarPessoaInterface();
     if (novaPessoa) {
       cout << "✅ Operação concluída com sucesso!" << endl;
@@ -38,8 +55,10 @@ void processarOpcao(const string& opcao) {
     else {
       cout << "❌ Falha ao criar pessoa!" << endl;
     }
+    break;
   }
-  else if (opcao == "2") {
+
+  case 2: {
     Familia* novaFamilia = criarFamiliaInterface();
     if (novaFamilia) {
       cout << "✅ Operação concluída com sucesso!" << endl;
@@ -47,27 +66,48 @@ void processarOpcao(const string& opcao) {
     else {
       cout << "❌ Falha ao criar família!" << endl;
     }
+    break;
   }
-  else if (opcao == "3") {
+
+  case 3:
     criarArvoreInterface();
     cout << "✅ Operação concluída com sucesso!" << endl;
-  }
-  else if (opcao == "4") {
+    break;
+
+  case 4:
     listarPessoas();
-  }
-  else if (opcao == "0") {
-    cout << "Saindo do programa..." << endl;
-  }
-  else {
+    break;
+
+  case 5:
+    salvarArquivoUnico();
+    break;
+
+  case 6:
+    carregarArquivoUnico();
+    break;
+
+  case 7:
+    listarArvoresSalvasInterface();
+    break;
+
+  default:
     cout << "❌ Opção inválida: '" << opcao << "'" << endl;
-    cout << "Por favor, escolha uma opção entre 0 e 4." << endl;
+    cout << "Por favor, escolha uma opção entre 0 e 7." << endl;
+    break;
   }
 
-  if (opcao != "0") {
+  // Pausar apenas se não for sair
+  if (opcaoNum != 0) {
     pausar();
   }
-  }
+}
 
 bool deveContinuar(const string& opcao) {
-  return opcao != "0";
+  // Converter para número e verificar se é 0
+  try {
+    return stoi(opcao) != 0;
+  }
+  catch (const exception&) {
+    return true; // Se não é número, continua (será tratado como inválido)
+  }
 }
