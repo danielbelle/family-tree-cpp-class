@@ -1,6 +1,6 @@
 *.exe
 *.vscode
-build/
+build/*
 compile_vars.tmp
 *.o
 *.obj
@@ -8,14 +8,12 @@ compile_vars.tmp
 *.so
 *.dylib
 *.out
-.vscode/
-.idea/
+.vscode/*
+.idea/*
 *.swp
 *.swo
 .DS_Store
-export.txt
+export.md
 export.ps1
 main-backup.cpp
 family_tree.exe
-data/
-compilebackup.bat

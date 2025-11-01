@@ -17,11 +17,7 @@
 #endif
 
 // Headers do projeto
-#include "../core/estruturas.hpp"
 #include "../core/main.hpp"
-#include "../core/operacoes.hpp"
-#include "../core/execucao.hpp"
-#include "../core/persistencia.hpp"
 
 // Bibliotecas externas
   
