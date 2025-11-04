@@ -33,7 +33,7 @@ if [ ! -d "$BUILD_DIR" ]; then
     mkdir -p "$BUILD_DIR"
 fi
 
-# Iniciar arquivo de exportação
+# Iniciar arquivo de exportação com UTF-8
 echo "PROJETO: $PROJECT_NAME" > "$OUTPUT_FILE"
 echo "Data: $DATA_ATUAL" >> "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
@@ -111,7 +111,7 @@ echo "CONTEUDO DOS ARQUIVOS" >> "$OUTPUT_FILE"
 echo "=====================" >> "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
 
-# Adicionar conteúdo de cada arquivo
+# Adicionar conteúdo de cada arquivo com suporte a UTF-8
 for CAMINHO in "${ARQUIVOS_ENCONTRADOS[@]}"; do
     CAMINHO_RELATIVO="${CAMINHO#$PROJECT_ROOT/}"
     
@@ -121,9 +121,20 @@ for CAMINHO in "${ARQUIVOS_ENCONTRADOS[@]}"; do
         echo "ARQUIVO: $CAMINHO_RELATIVO" >> "$OUTPUT_FILE"
         echo "----------------------------------------" >> "$OUTPUT_FILE"
         
-        # Ler e adicionar conteúdo do arquivo
+        # Ler e adicionar conteúdo do arquivo com suporte a UTF-8
         if [ -r "$CAMINHO" ]; then
-            cat "$CAMINHO" >> "$OUTPUT_FILE"
+            # Usar iconv para garantir codificação UTF-8 ou cat com LANG definido
+            if command -v iconv >/dev/null 2>&1; then
+                # Tentar detectar a codificação e converter para UTF-8
+                if file -i "$CAMINHO" | grep -q "utf-8\|us-ascii"; then
+                    cat "$CAMINHO" >> "$OUTPUT_FILE"
+                else
+                    iconv -f "$(file -bi "$CAMINHO" | sed -e 's/.*[ ]charset=//')" -t UTF-8 "$CAMINHO" >> "$OUTPUT_FILE" 2>/dev/null || cat "$CAMINHO" >> "$OUTPUT_FILE"
+                fi
+            else
+                # Fallback: usar cat com locale definido para UTF-8
+                LANG=C.UTF-8 cat "$CAMINHO" >> "$OUTPUT_FILE" 2>/dev/null || cat "$CAMINHO" >> "$OUTPUT_FILE"
+            fi
         else
             echo "❌ ERRO: Não foi possível ler o arquivo" >> "$OUTPUT_FILE"
         fi

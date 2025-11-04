@@ -1,7 +1,27 @@
-idPessoa,nome,genero,familia,idFamilia,conjuge,idConjuge,pai,idPai,mae,idMae
-p1,João Silva,M,Silva,f1,,,,,,
-p2,Maria Santos,F,Silva,f1,João Silva,p1,,,,
-p3,Pedro Silva,M,Silva,f1,,,João Silva,p1,Maria Santos,p2
-p4,Ana Silva,F,Silva,f1,,,João Silva,p1,Maria Santos,p2
-p5,Carlos Oliveira,M,Oliveira,f2,,,,,,
-p6,Julia Mendes,F,Oliveira,f2,Carlos Oliveira,p5,,,,
+id,nome,genero,id_pai,id_mae,id_conjuge
+1,João Silva,M,0,0,2
+2,Maria Santos,F,0,0,1
+3,Pedro Silva,M,1,2,4
+4,Ana Costa,F,0,0,3
+5,Carlos Silva,M,1,2,6
+6,Beatriz Oliveira,F,0,0,5
+7,Julia Silva,F,1,2,8
+8,Rafael Pereira,M,0,0,7
+9,Lucas Costa,M,3,4,10
+10,Isabela Rodrigues,F,0,0,9
+11,Sofia Costa,F,3,4,12
+12,Mateus Almeida,M,0,0,11
+13,Gabriel Silva,M,5,6,0
+14,Larissa Silva,F,5,6,15
+15,Diego Souza,M,0,0,14
+16,Fernando Costa,M,9,10,17
+17,Camila Lima,F,0,0,16
+18,Manuela Costa,F,9,10,0
+19,Arthur Almeida,M,11,12,0
+20,Helena Almeida,F,11,12,0
+21,Enzo Souza,M,14,15,0
+22,Valentina Souza,F,14,15,0
+23,Leonardo Lima,M,16,17,0
+24,Lorena Lima,F,16,17,0
+25,Heitor Costa,M,9,10,0
+26,Laura Costa,F,9,10,0

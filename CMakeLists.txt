@@ -1,41 +1,36 @@
 cmake_minimum_required(VERSION 3.10)
 project(family-tree)
 
-# Forçar MinGW no Windows
-if(WIN32)
-    # Definir o compilador MinGW explicitamente
-    set(CMAKE_C_COMPILER "gcc")
-    set(CMAKE_CXX_COMPILER "g++")
-    set(CMAKE_MAKE_PROGRAM "mingw32-make")
-    
-    # Usar generator MinGW
-    set(CMAKE_GENERATOR "MinGW Makefiles")
-endif()
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Configurações específicas por compilador
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    # Flags para GCC/MinGW
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+# Configurações para suporte a UTF-8
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -finput-charset=UTF-8 -fexec-charset=UTF-8")
 elseif(MSVC)
-    # Flags para Visual Studio
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8")
+    add_compile_definitions(_UNICODE UNICODE)
 endif()
 
-# Arquivos fonte
+# Garantir consistência em versões mais novas do CMake
+if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.20)
+    set(CMAKE_CXX_STANDARD_REQUIRED YES)
+    set(CMAKE_CXX_EXTENSIONS OFF)
+endif()
+
 set(SOURCES
     src/main.cpp
-    src/pessoa.cpp
-    src/csv_reader.cpp
-    src/familia.cpp
 )
 
 add_executable(family-tree ${SOURCES})
 target_include_directories(family-tree PRIVATE src)
 
-# Mensagem de status
+# Forçar codificação UTF-8 no GCC / Clang
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(family-tree PRIVATE "-finput-charset=UTF-8")
+    target_compile_options(family-tree PRIVATE "-fexec-charset=UTF-8")
+    target_compile_options(family-tree PRIVATE "-fwide-exec-charset=UTF-8")
+endif()
+
 message(STATUS "Compiler: ${CMAKE_CXX_COMPILER}")
-message(STATUS "Generator: ${CMAKE_GENERATOR}")
+message(STATUS "CXX Flags: ${CMAKE_CXX_FLAGS}")
