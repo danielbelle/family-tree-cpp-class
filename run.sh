@@ -64,16 +64,13 @@ kill_existing_instances() {
 # Função para mostrar menu
 show_menu() {
     echo -e "${BLUE}=== SISTEMA DE ÁRVORE GENEALÓGICA ===${NC}"
-    echo -e "${GREEN}1${NC} - mb   (Apenas compilar)"
-    echo -e "${GREEN}2${NC} - run  (Apenas executar)" 
-    echo -e "${GREEN}3${NC} - mbr  (Compilar e executar)" 
-    echo -e "${GREEN}4${NC} - rec  (Reconfigurar e compilar)"
-    echo -e "${GREEN}5${NC} - recr (Reconfigurar, compilar e executar)"
-    echo -e "${GREEN}6${NC} - rmvbuild (Remover pasta build)"
-    echo -e "${GREEN}7${NC} - kill (Encerrar instâncias em execução)"
-    echo -e "${GREEN}9${NC} - exp  (Exportar código)"
+    echo -e "${GREEN}1${NC} - recr (Reconfigurar, compilar e executar)"
+    echo -e "${GREEN}2${NC} - run (Executar)" 
+    echo -e "${GREEN}3${NC} - all (Kill build, Reconfigurar, compilar e executar)"
+    echo -e "${GREEN}4${NC} - kill (Encerrar instâncias em execução)"
+    echo -e "${GREEN}5${NC} - exp  (Exportar código)"
     echo -e "${GREEN}0${NC} - Sair"
-    echo -n -e "${YELLOW}Escolha uma opção [0-9]: ${NC}"
+    echo -n -e "${YELLOW}Escolha uma opção [0-5]: ${NC}"
 }
 
 # Função para compilar apenas
@@ -288,6 +285,15 @@ check_build_dir() {
     fi
 }
 
+#
+all() {
+    echo -e "${BLUE}=== KILL, DELETAR PASTA BUILD, RECONFIGURAR, COMPILAR E EXECUTAR ===${NC}"
+    kill_existing_instances
+    rmvbuild
+    recr
+    run
+}
+
 # Main
 main() {
     # Configurar terminal para UTF-8
@@ -306,27 +312,18 @@ main() {
         
         case $choice in
             1)
-                mb
+                recr
                 ;;
             2)
                 run
                 ;;
             3)
-                mbr
+                all
                 ;;
             4)
-                rec
-                ;;
-            5)
-                recr
-                ;;
-            6)
-                rmvbuild
-                ;;
-            7)
                 kill_instances
                 ;;
-            9)
+            5)
                 exp
                 ;;
             0)

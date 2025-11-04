@@ -3,25 +3,18 @@ project(family_tree)
 
 # Configurar para MinGW
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# Desabilitar PCH por enquanto (pode causar problemas)
-set(CMAKE_DISABLE_PRECOMPILE_HEADERS ON)
+set(CMAKE_CXX_STANDARD_REQUIRED OFF)
 
 # Configurar diretórios de include
 include_directories(
     ${CMAKE_SOURCE_DIR}/include
 )
 
-# Especificar arquivos fonte
-set(SOURCE_FILES
-    "src/main.cpp"
-    "src/processo.cpp"
-    "src/menu_principal.cpp"
-    "src/menu_criar.cpp"
-    "src/menu_exibir.cpp"
-    "src/menu_import_export.cpp"
-    "src/menu_funcoes.cpp"
+# Encontrar todos os arquivos .cpp recursivamente
+file(GLOB_RECURSE SOURCE_FILES 
+    "src/*.cpp"
+    "src/*/*.cpp"
+    "src/*/*/*.cpp"
 )
 
 # Criar executável
@@ -40,4 +33,8 @@ if(WIN32)
     target_compile_options(${PROJECT_NAME} PRIVATE -municode)
 endif()
 
-message(STATUS "Arquivos fonte: ${SOURCE_FILES}")
+# Mensagem de status
+message(STATUS "=== CONFIGURAÇÃO MODULAR ===")
+message(STATUS "Projeto: ${PROJECT_NAME}")
+message(STATUS "Arquivos fonte encontrados: ${SOURCE_FILES}")
+message(STATUS "=============================")
