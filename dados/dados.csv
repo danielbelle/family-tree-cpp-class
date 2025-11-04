@@ -29,3 +29,6 @@ id,nome,genero,id_pai,id_mae,id_conjuge
 28,Carlita,F,27,0,0
 29,larica,M,3,4,0
 30,João,M,0,28,0
+31,Kari,F,1,0,0
+32,0,M,0,0,0
+33,Daniel,F,0,0,0
