@@ -8,6 +8,7 @@
 #include <string>
 #include <map>
 #include <algorithm>
+#include <functional>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -52,5 +53,13 @@ void salvarCSV(const map<int, Pessoa>& arvore, const string& filename);
 // Interface do usuário
 void adicionarPessoaInterativo(map<int, Pessoa>& arvore);
 void menuInterativo(map<int, Pessoa>& arvore);
+
+// Funções de busca e linhagem
+int buscarPessoaPorNome(const map<int, Pessoa>& arvore, const string& nome);
+void exibirLinhaAscendencia(const map<int, Pessoa>& arvore, int pessoa_id);
+void exibirLinhaDescendencia(const map<int, Pessoa>& arvore, int pessoa_id, int nivel, vector<bool>& ultimos);
+void exibirAscendentesEDescendentes(map<int, Pessoa>& arvore);
+void listarArvoreDesdeAncestral(map<int, Pessoa>& arvore);
+int buscarPessoaInterativo(const map<int, Pessoa>& arvore);
 
 #endif

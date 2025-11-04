@@ -459,6 +459,196 @@ void adicionarPessoaInterativo(map<int, Pessoa>& arvore) {
   adicionarPessoa(arvore, nova);
 }
 
+// Função para buscar pessoa por nome (retorna ID ou -1 se não encontrou)
+int buscarPessoaPorNome(const map<int, Pessoa>& arvore, const string& nome) {
+  for (const auto& par : arvore) {
+    const Pessoa& p = par.second;
+    if (p.nome == nome) {
+      return p.id;
+    }
+  }
+  return -1; // Não encontrado
+}
+
+// Função para exibir a linha de ascendência (da raiz até a pessoa)
+void exibirLinhaAscendencia(const map<int, Pessoa>& arvore, int pessoa_id) {
+  if (arvore.find(pessoa_id) == arvore.end()) return;
+
+  const Pessoa& p = arvore.at(pessoa_id);
+
+  // Primeiro exibe os ascendentes recursivamente
+  if (p.id_pai > 0) {
+    exibirLinhaAscendencia(arvore, p.id_pai);
+  }
+  else if (p.id_mae > 0) {
+    exibirLinhaAscendencia(arvore, p.id_mae);
+  }
+
+  // Depois exibe a pessoa atual
+  if (p.id_pai > 0 || p.id_mae > 0) {
+    cout << " -> ";
+  }
+
+  cout << p.nome << " (" << p.genero << ")";
+}
+
+// Função para exibir a linha de descendência (da pessoa até os últimos descendentes)
+void exibirLinhaDescendencia(const map<int, Pessoa>& arvore, int pessoa_id, int nivel, vector<bool>& ultimos) {
+  if (arvore.find(pessoa_id) == arvore.end()) return;
+
+  const Pessoa& p = arvore.at(pessoa_id);
+
+  // Imprime a estrutura visual
+  for (int i = 0; i < nivel; i++) {
+    if (i == nivel - 1) {
+      cout << (ultimos[i] ? "   └── " : "   ├── ");
+    }
+    else {
+      cout << (ultimos[i] ? "    " : "   │");
+    }
+  }
+
+  // Imprime a pessoa
+  cout << p.nome << " (" << p.genero << ") [ID: " << p.id << "]";
+
+  // Se tem conjuge, imprime também
+  if (p.id_conjuge > 0 && arvore.find(p.id_conjuge) != arvore.end()) {
+    const Pessoa& conjuge = arvore.at(p.id_conjuge);
+    cout << " 💑 " << conjuge.nome;
+  }
+  cout << endl;
+
+  // Imprime os filhos recursivamente
+  if (!p.filhos.empty()) {
+    ultimos.push_back(false);
+
+    for (size_t i = 0; i < p.filhos.size(); i++) {
+      if (i == p.filhos.size() - 1) {
+        ultimos[nivel] = true;
+      }
+      exibirLinhaDescendencia(arvore, p.filhos[i], nivel + 1, ultimos);
+    }
+
+    ultimos.pop_back();
+  }
+}
+
+// Função auxiliar para buscar pessoa de forma interativa
+int buscarPessoaInterativo(const map<int, Pessoa>& arvore) {
+  int opcao_busca;
+  cout << "\n=== BUSCAR PESSOA ===" << endl;
+  cout << "1. Buscar por ID" << endl;
+  cout << "2. Buscar por nome" << endl;
+  cout << "Escolha: ";
+  cin >> opcao_busca;
+
+  int pessoa_id = -1;
+
+  if (opcao_busca == 1) {
+    cout << "Digite o ID: ";
+    cin >> pessoa_id;
+
+    if (arvore.find(pessoa_id) == arvore.end()) {
+      cout << "Erro: Pessoa com ID " << pessoa_id << " não encontrada!" << endl;
+      return -1;
+    }
+  }
+  else if (opcao_busca == 2) {
+    string nome;
+    cout << "Digite o nome: ";
+    cin.ignore();
+    getline(cin, nome);
+
+    pessoa_id = buscarPessoaPorNome(arvore, nome);
+
+    if (pessoa_id == -1) {
+      cout << "Erro: Pessoa com nome '" << nome << "' não encontrada!" << endl;
+      return -1;
+    }
+  }
+  else {
+    cout << "Opção inválida!" << endl;
+    return -1;
+  }
+
+  return pessoa_id;
+}
+
+// Função específica para listar árvore completa a partir de um ancestral
+void listarArvoreDesdeAncestral(map<int, Pessoa>& arvore) {
+  int pessoa_id = buscarPessoaInterativo(arvore);
+  if (pessoa_id == -1) return;
+
+  const Pessoa& ancestral = arvore.at(pessoa_id);
+
+  cout << "\n=== ÁRVORE COMPLETA DESDE " << ancestral.nome << " ===" << endl;
+  cout << "Ancestral: " << ancestral.nome << " (" << ancestral.genero << ") [ID: " << ancestral.id << "]" << endl;
+
+  if (ancestral.id_conjuge > 0 && arvore.find(ancestral.id_conjuge) != arvore.end()) {
+    const Pessoa& conjuge = arvore.at(ancestral.id_conjuge);
+    cout << "Cônjuge: " << conjuge.nome << " (" << conjuge.genero << ") [ID: " << conjuge.id << "]" << endl;
+  }
+
+  cout << "=====================================" << endl;
+
+  vector<bool> ultimos;
+  exibirLinhaDescendencia(arvore, pessoa_id, 0, ultimos);
+
+  // Estatísticas adicionais
+  int total_descendentes = 0;
+  function<void(int)> contarDescendentes = [&](int id) {
+    const Pessoa& p = arvore.at(id);
+    total_descendentes++;
+    for (int filho_id : p.filhos) {
+      contarDescendentes(filho_id);
+    }
+    };
+  contarDescendentes(pessoa_id);
+
+  cout << "\n--- ESTATÍSTICAS DA ÁRVORE ---" << endl;
+  cout << "Ancestral principal: " << ancestral.nome << endl;
+  cout << "Total de descendentes: " << (total_descendentes - 1) << endl; // -1 para excluir o próprio ancestral
+  cout << "Filhos diretos: " << ancestral.filhos.size() << endl;
+}
+
+// Função principal que exibe ascendentes e descendentes (OTIMIZADA)
+void exibirAscendentesEDescendentes(map<int, Pessoa>& arvore) {
+  int pessoa_id = buscarPessoaInterativo(arvore);
+  if (pessoa_id == -1) return;
+
+  const Pessoa& pessoa = arvore.at(pessoa_id);
+
+  cout << "\n=== LINHAGEM COMPLETA DE " << pessoa.nome << " ===" << endl;
+
+  // Exibir ascendentes
+  cout << "\n--- ASCENDENTES (da raiz até " << pessoa.nome << ") ---" << endl;
+
+  // Encontrar a raiz da árvore
+  int raiz_id;
+  encontrarRaiz(arvore, raiz_id);
+
+  if (raiz_id != -1) {
+    cout << "Raiz: ";
+    exibirLinhaAscendencia(arvore, pessoa_id);
+    cout << endl;
+  }
+  else {
+    cout << "Não foi possível encontrar a raiz da árvore." << endl;
+  }
+
+  // Exibir descendentes (REUTILIZANDO a função listarArvoreDesdeAncestral)
+  cout << "\n--- DESCENDENTES (de " << pessoa.nome << " até os últimos) ---" << endl;
+
+  // Reutiliza a lógica de exibição de descendentes
+  vector<bool> ultimos;
+  exibirLinhaDescendencia(arvore, pessoa_id, 0, ultimos);
+
+  // Estatísticas
+  cout << "\n--- ESTATÍSTICAS ---" << endl;
+  cout << "Pessoa: " << pessoa.nome << " (" << pessoa.genero << ") [ID: " << pessoa.id << "]" << endl;
+  cout << "Número de descendentes diretos: " << pessoa.filhos.size() << endl;
+}
+
 void menuInterativo(map<int, Pessoa>& arvore) {
   int opcao;
 
@@ -469,6 +659,9 @@ void menuInterativo(map<int, Pessoa>& arvore) {
     cout << "3. Salvar alterações no CSV" << endl;
     cout << "4. Visualizar árvore atual" << endl;
     cout << "5. Listar todas as pessoas" << endl;
+    cout << "6. Exibir ascendentes e descendentes" << endl;
+    cout << "7. Buscar pessoa por nome" << endl;
+    cout << "8. Listar árvore desde ancestral" << endl;
     cout << "0. Sair" << endl;
     cout << "Escolha: ";
     cin >> opcao;
@@ -508,6 +701,33 @@ void menuInterativo(map<int, Pessoa>& arvore) {
       }
       break;
     }
+    case 6:
+      exibirAscendentesEDescendentes(arvore);
+      break;
+    case 7: {
+      string nomeBusca = "";
+      cout << "Digite o nome: ";
+      cin.ignore();
+      getline(cin, nomeBusca);
+
+      int pessoa_id = buscarPessoaPorNome(arvore, nomeBusca);
+
+      if (pessoa_id == -1) {
+        cout << "Erro: Pessoa com nome '" << nomeBusca << "' não encontrada!" << endl;
+      }
+      else {
+        const Pessoa& p = arvore.at(pessoa_id);
+        cout << "Pessoa encontrada: " << p.nome << " (ID: " << pessoa_id << ") Gênero: " << p.genero << endl;
+        cout << "Pai: " << (p.id_pai > 0 ? arvore.at(p.id_pai).nome : "Não definido") << endl;
+        cout << "Mãe: " << (p.id_mae > 0 ? arvore.at(p.id_mae).nome : "Não definido") << endl;
+        cout << "Cônjuge: " << (p.id_conjuge > 0 ? arvore.at(p.id_conjuge).nome : "Não definido") << endl;
+        cout << "Filhos: " << p.filhos.size() << endl;
+      }
+      break;
+    }
+    case 8:
+      listarArvoreDesdeAncestral(arvore);
+      break;
     case 0:
       cout << "Saindo do menu interativo..." << endl;
       break;
