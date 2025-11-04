@@ -1,9 +1,36 @@
 #include "main.hpp"
+#include <limits>
+
+void configurarUTF8() {
+#ifdef _WIN32
+  // Configurar console Windows para UTF-8
+  SetConsoleOutputCP(CP_UTF8);
+  SetConsoleCP(CP_UTF8);
+
+  // Buffer para evitar problemas com acentos
+  setvbuf(stdout, nullptr, _IOFBF, 1000);
+#else
+  // Linux/macOS já suportam UTF-8 nativamente
+  setlocale(LC_ALL, "en_US.UTF-8");
+#endif
+}
+
+// Função para ler string com suporte a UTF-8
+string lerStringUTF8() {
+  string texto;
+
+  // Limpar buffer do cin
+  cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+  // Ler linha com suporte a caracteres especiais
+  getline(cin, texto);
+
+  return texto;
+}
 
 int main() {
-#ifdef _WIN32
-  SetConsoleOutputCP(CP_UTF8);
-#endif
+  // Configurar UTF-8 no console
+  configurarUTF8();
 
   cout << "=== SISTEMA DE ÁRVORE GENEALÓGICA ===" << endl;
 
@@ -307,9 +334,8 @@ void definirParenteComoMae(map<int, Pessoa>& arvore, Pessoa& filho, int id_paren
 void criarConjugeAutomatico(map<int, Pessoa>& arvore, Pessoa& parente, Pessoa& filho, char genero_conjuge) {
   cout << "Criando nova pessoa como " << (genero_conjuge == 'M' ? "pai" : "mãe") << " de " << filho.nome << endl;
   cout << "Nome: ";
-  cin.ignore();
-  string nome_conjuge;
-  getline(cin, nome_conjuge);
+
+  string nome_conjuge = lerStringUTF8();
 
   Pessoa novo_conjuge = criarNovaPessoa(arvore, nome_conjuge, genero_conjuge, parente.id);
   arvore[novo_conjuge.id] = novo_conjuge;
@@ -448,8 +474,7 @@ void adicionarPessoaInterativo(map<int, Pessoa>& arvore) {
   nova.id = 0;
 
   cout << "Nome: ";
-  cin.ignore();
-  getline(cin, nova.nome);
+  nova.nome = lerStringUTF8();
 
   nova.genero = solicitarGeneroValido();
   nova.id_pai = 0;
@@ -461,9 +486,18 @@ void adicionarPessoaInterativo(map<int, Pessoa>& arvore) {
 
 // Função para buscar pessoa por nome (retorna ID ou -1 se não encontrou)
 int buscarPessoaPorNome(const map<int, Pessoa>& arvore, const string& nome) {
+  // Converter nome para minúsculas para busca case-insensitive
+  string nomeLower = nome;
+  transform(nomeLower.begin(), nomeLower.end(), nomeLower.begin(), ::tolower);
+
   for (const auto& par : arvore) {
     const Pessoa& p = par.second;
-    if (p.nome == nome) {
+
+    // Converter nome da pessoa para minúsculas
+    string pessoaNomeLower = p.nome;
+    transform(pessoaNomeLower.begin(), pessoaNomeLower.end(), pessoaNomeLower.begin(), ::tolower);
+
+    if (pessoaNomeLower == nomeLower) {
       return p.id;
     }
   }
@@ -539,7 +573,6 @@ int buscarPessoaInterativo(const map<int, Pessoa>& arvore) {
   cout << "\n=== BUSCAR PESSOA ===" << endl;
   cout << "1. Buscar por ID" << endl;
   cout << "2. Buscar por nome" << endl;
-  cout << "0. Cancelar" << endl;
   cout << "Escolha: ";
   cin >> opcao_busca;
 
@@ -557,8 +590,7 @@ int buscarPessoaInterativo(const map<int, Pessoa>& arvore) {
   else if (opcao_busca == 2) {
     string nome;
     cout << "Digite o nome: ";
-    cin.ignore();
-    getline(cin, nome);
+    nome = lerStringUTF8();
 
     pessoa_id = buscarPessoaPorNome(arvore, nome);
 
@@ -947,8 +979,7 @@ void menuInterativo(map<int, Pessoa>& arvore) {
     case 7: {
       string nomeBusca = "";
       cout << "Digite o nome: ";
-      cin.ignore();
-      getline(cin, nomeBusca);
+      nomeBusca = lerStringUTF8();
 
       int pessoa_id = buscarPessoaPorNome(arvore, nomeBusca);
 

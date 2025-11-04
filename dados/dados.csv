@@ -25,3 +25,7 @@ id,nome,genero,id_pai,id_mae,id_conjuge
 24,Lorena Lima,F,16,17,0
 25,Heitor Costa,M,9,10,0
 26,Laura Costa,F,9,10,0
+27,Daniel,M,5,6,0
+28,Carlita,F,27,0,0
+29,larica,M,3,4,0
+30,João,M,0,28,0

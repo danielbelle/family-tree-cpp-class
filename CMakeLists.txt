@@ -6,10 +6,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Configurações para suporte a UTF-8
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -finput-charset=UTF-8 -fexec-charset=UTF-8")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -finput-charset=UTF-8 -fexec-charset=UTF-8 -fwide-exec-charset=UTF-8")
 elseif(MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8")
-    add_compile_definitions(_UNICODE UNICODE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8 /source-charset:utf-8 /execution-charset:utf-8")
+    add_compile_definitions(_UNICODE UNICODE _CRT_SECURE_NO_WARNINGS)
 endif()
 
 # Garantir consistência em versões mais novas do CMake
