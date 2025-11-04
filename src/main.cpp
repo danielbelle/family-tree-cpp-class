@@ -340,24 +340,31 @@ void definirPais(map<int, Pessoa>& arvore, int id_filho) {
         cin >> resposta;
 
         if (resposta == 's' || resposta == 'S') {
-          int id_mae;
-          cout << "Digite o ID da mãe: ";
-          cin >> id_mae;
+          // Criar nova pessoa automaticamente como mãe
+          Pessoa nova_mae;
+          nova_mae.id = obterProximoId(arvore);
 
-          if (arvore.find(id_mae) != arvore.end()) {
-            filho.id_mae = id_mae;
-            arvore[id_mae].filhos.push_back(id_filho);
+          cout << "Criando nova pessoa como mãe de " << filho.nome << endl;
+          cout << "Nome da mãe: ";
+          cin.ignore();
+          getline(cin, nova_mae.nome);
 
-            // Remover duplicatas
-            auto& filhos_mae = arvore[id_mae].filhos;
-            sort(filhos_mae.begin(), filhos_mae.end());
-            filhos_mae.erase(unique(filhos_mae.begin(), filhos_mae.end()), filhos_mae.end());
+          nova_mae.genero = 'F'; // Gênero oposto ao pai
+          nova_mae.id_pai = 0;
+          nova_mae.id_mae = 0;
+          nova_mae.id_conjuge = id_parente; // Definir como cônjuge do pai
 
-            cout << arvore[id_mae].nome << " definida como mãe de " << filho.nome << endl;
-          }
-          else {
-            cout << "Erro: ID da mãe não encontrado!" << endl;
-          }
+          // Adicionar nova mãe à árvore
+          arvore[nova_mae.id] = nova_mae;
+
+          // Atualizar o pai para ter esta mãe como cônjuge
+          parente.id_conjuge = nova_mae.id;
+
+          // Definir a nova mãe como mãe do filho
+          filho.id_mae = nova_mae.id;
+          nova_mae.filhos.push_back(id_filho);
+
+          cout << nova_mae.nome << " criada como mãe de " << filho.nome << " e cônjuge de " << parente.nome << " (ID: " << nova_mae.id << ")" << endl;
         }
       }
     }
@@ -395,24 +402,31 @@ void definirPais(map<int, Pessoa>& arvore, int id_filho) {
         cin >> resposta;
 
         if (resposta == 's' || resposta == 'S') {
-          int id_pai;
-          cout << "Digite o ID do pai: ";
-          cin >> id_pai;
+          // Criar nova pessoa automaticamente como pai
+          Pessoa novo_pai;
+          novo_pai.id = obterProximoId(arvore);
 
-          if (arvore.find(id_pai) != arvore.end()) {
-            filho.id_pai = id_pai;
-            arvore[id_pai].filhos.push_back(id_filho);
+          cout << "Criando nova pessoa como pai de " << filho.nome << endl;
+          cout << "Nome do pai: ";
+          cin.ignore();
+          getline(cin, novo_pai.nome);
 
-            // Remover duplicatas
-            auto& filhos_pai = arvore[id_pai].filhos;
-            sort(filhos_pai.begin(), filhos_pai.end());
-            filhos_pai.erase(unique(filhos_pai.begin(), filhos_pai.end()), filhos_pai.end());
+          novo_pai.genero = 'M'; // Gênero oposto à mãe
+          novo_pai.id_pai = 0;
+          novo_pai.id_mae = 0;
+          novo_pai.id_conjuge = id_parente; // Definir como cônjuge da mãe
 
-            cout << arvore[id_pai].nome << " definido como pai de " << filho.nome << endl;
-          }
-          else {
-            cout << "Erro: ID do pai não encontrado!" << endl;
-          }
+          // Adicionar novo pai à árvore
+          arvore[novo_pai.id] = novo_pai;
+
+          // Atualizar a mãe para ter este pai como cônjuge
+          parente.id_conjuge = novo_pai.id;
+
+          // Definir o novo pai como pai do filho
+          filho.id_pai = novo_pai.id;
+          novo_pai.filhos.push_back(id_filho);
+
+          cout << novo_pai.nome << " criado como pai de " << filho.nome << " e cônjuge de " << parente.nome << " (ID: " << novo_pai.id << ")" << endl;
         }
       }
     }
