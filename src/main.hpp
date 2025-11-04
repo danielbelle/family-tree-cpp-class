@@ -25,18 +25,32 @@ struct Pessoa {
   vector<int> filhos;
 };
 
-// Protótipos das funções
+// Funções principais
 vector<Pessoa> lerCSV(const string& filename);
 map<int, Pessoa> construirArvore(vector<Pessoa>& pessoas);
 void encontrarRaiz(map<int, Pessoa>& arvore, int& raiz_id);
 void imprimirArvore(const map<int, Pessoa>& arvore, int pessoa_id, int nivel, vector<bool>& ultimos);
 bool validarArvore(const map<int, Pessoa>& arvore);
 
-// Novas funções para manipulação dinâmica
+// Funções auxiliares
 int obterProximoId(const map<int, Pessoa>& arvore);
+void removerDuplicatas(vector<int>& vetor);
+bool validarGenero(char genero);
+char solicitarGeneroValido();
+Pessoa criarNovaPessoa(const map<int, Pessoa>& arvore, const string& nome, char genero, int id_conjuge = 0);
+
+// Funções de manipulação
 void adicionarPessoa(map<int, Pessoa>& arvore, const Pessoa& nova_pessoa);
 void definirPais(map<int, Pessoa>& arvore, int id_filho);
+void definirParenteComoPai(map<int, Pessoa>& arvore, Pessoa& filho, int id_parente);
+void definirParenteComoMae(map<int, Pessoa>& arvore, Pessoa& filho, int id_parente);
+void processarDefinicaoMae(map<int, Pessoa>& arvore, Pessoa& pai, Pessoa& filho);
+void processarDefinicaoPai(map<int, Pessoa>& arvore, Pessoa& mae, Pessoa& filho);
+void criarConjugeAutomatico(map<int, Pessoa>& arvore, Pessoa& parente, Pessoa& filho, char genero_conjuge);
 void salvarCSV(const map<int, Pessoa>& arvore, const string& filename);
+
+// Interface do usuário
+void adicionarPessoaInterativo(map<int, Pessoa>& arvore);
 void menuInterativo(map<int, Pessoa>& arvore);
 
 #endif

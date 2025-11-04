@@ -120,8 +120,7 @@ map<int, Pessoa> construirArvore(vector<Pessoa>& pessoas) {
   // Remove duplicatas nos vetores de filhos
   for (auto& par : arvore) {
     Pessoa& p = par.second;
-    sort(p.filhos.begin(), p.filhos.end());
-    p.filhos.erase(unique(p.filhos.begin(), p.filhos.end()), p.filhos.end());
+    removerDuplicatas(p.filhos);
   }
 
   return arvore;
@@ -238,6 +237,39 @@ int obterProximoId(const map<int, Pessoa>& arvore) {
   return maior_id + 1; // Próximo ID disponível
 }
 
+void removerDuplicatas(vector<int>& vetor) {
+  sort(vetor.begin(), vetor.end());
+  vetor.erase(unique(vetor.begin(), vetor.end()), vetor.end());
+}
+
+bool validarGenero(char genero) {
+  return genero == 'M' || genero == 'F';
+}
+
+char solicitarGeneroValido() {
+  char genero;
+  do {
+    cout << "Gênero (M/F): ";
+    cin >> genero;
+    genero = toupper(genero);
+    if (!validarGenero(genero)) {
+      cout << "Gênero inválido! Digite M ou F: ";
+    }
+  } while (!validarGenero(genero));
+  return genero;
+}
+
+Pessoa criarNovaPessoa(const map<int, Pessoa>& arvore, const string& nome, char genero, int id_conjuge) {
+  Pessoa nova;
+  nova.id = obterProximoId(arvore);
+  nova.nome = nome;
+  nova.genero = genero;
+  nova.id_pai = 0;
+  nova.id_mae = 0;
+  nova.id_conjuge = id_conjuge;
+  return nova;
+}
+
 void adicionarPessoa(map<int, Pessoa>& arvore, const Pessoa& nova_pessoa) {
   // Criar uma cópia da pessoa com ID gerado automaticamente
   Pessoa pessoa_com_id = nova_pessoa;
@@ -249,35 +281,98 @@ void adicionarPessoa(map<int, Pessoa>& arvore, const Pessoa& nova_pessoa) {
   // Atualizar relações com pais se especificados
   if (pessoa_com_id.id_pai > 0 && arvore.find(pessoa_com_id.id_pai) != arvore.end()) {
     arvore[pessoa_com_id.id_pai].filhos.push_back(pessoa_com_id.id);
-    // Remover duplicatas
-    auto& filhos_pai = arvore[pessoa_com_id.id_pai].filhos;
-    sort(filhos_pai.begin(), filhos_pai.end());
-    filhos_pai.erase(unique(filhos_pai.begin(), filhos_pai.end()), filhos_pai.end());
+    removerDuplicatas(arvore[pessoa_com_id.id_pai].filhos);
   }
 
   if (pessoa_com_id.id_mae > 0 && arvore.find(pessoa_com_id.id_mae) != arvore.end()) {
     arvore[pessoa_com_id.id_mae].filhos.push_back(pessoa_com_id.id);
-    // Remover duplicatas
-    auto& filhos_mae = arvore[pessoa_com_id.id_mae].filhos;
-    sort(filhos_mae.begin(), filhos_mae.end());
-    filhos_mae.erase(unique(filhos_mae.begin(), filhos_mae.end()), filhos_mae.end());
+    removerDuplicatas(arvore[pessoa_com_id.id_mae].filhos);
   }
 
   cout << "Pessoa " << pessoa_com_id.nome << " adicionada com sucesso! (ID: " << pessoa_com_id.id << ")" << endl;
 }
 
+void definirParenteComoPai(map<int, Pessoa>& arvore, Pessoa& filho, int id_parente) {
+  filho.id_pai = id_parente;
+  arvore[id_parente].filhos.push_back(filho.id);
+  removerDuplicatas(arvore[id_parente].filhos);
+}
+
+void definirParenteComoMae(map<int, Pessoa>& arvore, Pessoa& filho, int id_parente) {
+  filho.id_mae = id_parente;
+  arvore[id_parente].filhos.push_back(filho.id);
+  removerDuplicatas(arvore[id_parente].filhos);
+}
+
+void criarConjugeAutomatico(map<int, Pessoa>& arvore, Pessoa& parente, Pessoa& filho, char genero_conjuge) {
+  cout << "Criando nova pessoa como " << (genero_conjuge == 'M' ? "pai" : "mãe") << " de " << filho.nome << endl;
+  cout << "Nome: ";
+  cin.ignore();
+  string nome_conjuge;
+  getline(cin, nome_conjuge);
+
+  Pessoa novo_conjuge = criarNovaPessoa(arvore, nome_conjuge, genero_conjuge, parente.id);
+  arvore[novo_conjuge.id] = novo_conjuge;
+
+  parente.id_conjuge = novo_conjuge.id;
+
+  if (genero_conjuge == 'M') {
+    filho.id_pai = novo_conjuge.id;
+  }
+  else {
+    filho.id_mae = novo_conjuge.id;
+  }
+
+  novo_conjuge.filhos.push_back(filho.id);
+
+  cout << novo_conjuge.nome << " criado(a) como " << (genero_conjuge == 'M' ? "pai" : "mãe")
+    << " de " << filho.nome << " e cônjuge de " << parente.nome
+    << " (ID: " << novo_conjuge.id << ")" << endl;
+}
+
+void processarDefinicaoMae(map<int, Pessoa>& arvore, Pessoa& pai, Pessoa& filho) {
+  if (pai.id_conjuge > 0) {
+    filho.id_mae = pai.id_conjuge;
+    arvore[pai.id_conjuge].filhos.push_back(filho.id);
+    removerDuplicatas(arvore[pai.id_conjuge].filhos);
+    cout << arvore[pai.id_conjuge].nome << " definida automaticamente como mãe (cônjuge do pai)" << endl;
+  }
+  else {
+    char resposta;
+    cout << pai.nome << " não tem cônjuge. Deseja definir uma mãe para " << filho.nome << "? (s/n): ";
+    cin >> resposta;
+    if (resposta == 's' || resposta == 'S') {
+      criarConjugeAutomatico(arvore, pai, filho, 'F');
+    }
+  }
+}
+
+void processarDefinicaoPai(map<int, Pessoa>& arvore, Pessoa& mae, Pessoa& filho) {
+  if (mae.id_conjuge > 0) {
+    filho.id_pai = mae.id_conjuge;
+    arvore[mae.id_conjuge].filhos.push_back(filho.id);
+    removerDuplicatas(arvore[mae.id_conjuge].filhos);
+    cout << arvore[mae.id_conjuge].nome << " definido automaticamente como pai (cônjuge da mãe)" << endl;
+  }
+  else {
+    char resposta;
+    cout << mae.nome << " não tem cônjuge. Deseja definir um pai para " << filho.nome << "? (s/n): ";
+    cin >> resposta;
+    if (resposta == 's' || resposta == 'S') {
+      criarConjugeAutomatico(arvore, mae, filho, 'M');
+    }
+  }
+}
+
 void definirPais(map<int, Pessoa>& arvore, int id_filho) {
-  // Verificar se o filho existe
   if (arvore.find(id_filho) == arvore.end()) {
     cout << "Erro: Pessoa com ID " << id_filho << " não encontrada!" << endl;
     return;
   }
 
   Pessoa& filho = arvore[id_filho];
-
   cout << "\nDefinindo pais para: " << filho.nome << " (ID: " << id_filho << ")" << endl;
 
-  // Verificar se já tem pai e mãe
   if (filho.id_pai > 0 && filho.id_mae > 0) {
     cout << "Esta pessoa já tem ambos os pais definidos!" << endl;
     cout << "Pai: " << arvore[filho.id_pai].nome << " (ID: " << filho.id_pai << ")" << endl;
@@ -289,7 +384,6 @@ void definirPais(map<int, Pessoa>& arvore, int id_filho) {
   cout << "Digite o ID do pai ou mãe existente: ";
   cin >> id_parente;
 
-  // Verificar se o parente existe
   if (arvore.find(id_parente) == arvore.end()) {
     cout << "Erro: Pessoa com ID " << id_parente << " não encontrada!" << endl;
     return;
@@ -298,7 +392,6 @@ void definirPais(map<int, Pessoa>& arvore, int id_filho) {
   Pessoa& parente = arvore[id_parente];
   cout << "Parente selecionado: " << parente.nome << " (" << parente.genero << ") [ID: " << id_parente << "]";
 
-  // Verificar se tem cônjuge
   if (parente.id_conjuge > 0) {
     Pessoa& conjuge = arvore[parente.id_conjuge];
     cout << " 💑 " << conjuge.nome << " (" << conjuge.genero << ")" << endl;
@@ -307,128 +400,21 @@ void definirPais(map<int, Pessoa>& arvore, int id_filho) {
     cout << " (sem cônjuge)" << endl;
   }
 
-  // Definir relação baseada no gênero do parente
+  // Lógica unificada para ambos os gêneros
   if (parente.genero == 'M') {
-    // Parente é homem - será o pai
-    filho.id_pai = id_parente;
-    parente.filhos.push_back(id_filho);
-
-    // Remover duplicatas
-    sort(parente.filhos.begin(), parente.filhos.end());
-    parente.filhos.erase(unique(parente.filhos.begin(), parente.filhos.end()), parente.filhos.end());
-
+    definirParenteComoPai(arvore, filho, id_parente);
     cout << parente.nome << " definido como pai de " << filho.nome << endl;
 
-    // Verificar se precisa definir mãe
     if (filho.id_mae == 0) {
-      if (parente.id_conjuge > 0) {
-        // Tem cônjuge - definir automaticamente como mãe
-        filho.id_mae = parente.id_conjuge;
-        arvore[parente.id_conjuge].filhos.push_back(id_filho);
-
-        // Remover duplicatas
-        auto& filhos_mae = arvore[parente.id_conjuge].filhos;
-        sort(filhos_mae.begin(), filhos_mae.end());
-        filhos_mae.erase(unique(filhos_mae.begin(), filhos_mae.end()), filhos_mae.end());
-
-        cout << arvore[parente.id_conjuge].nome << " definida automaticamente como mãe (cônjuge do pai)" << endl;
-      }
-      else {
-        // Não tem cônjuge - perguntar se quer definir mãe
-        char resposta;
-        cout << parente.nome << " não tem cônjuge. Deseja definir uma mãe para " << filho.nome << "? (s/n): ";
-        cin >> resposta;
-
-        if (resposta == 's' || resposta == 'S') {
-          // Criar nova pessoa automaticamente como mãe
-          Pessoa nova_mae;
-          nova_mae.id = obterProximoId(arvore);
-
-          cout << "Criando nova pessoa como mãe de " << filho.nome << endl;
-          cout << "Nome da mãe: ";
-          cin.ignore();
-          getline(cin, nova_mae.nome);
-
-          nova_mae.genero = 'F'; // Gênero oposto ao pai
-          nova_mae.id_pai = 0;
-          nova_mae.id_mae = 0;
-          nova_mae.id_conjuge = id_parente; // Definir como cônjuge do pai
-
-          // Adicionar nova mãe à árvore
-          arvore[nova_mae.id] = nova_mae;
-
-          // Atualizar o pai para ter esta mãe como cônjuge
-          parente.id_conjuge = nova_mae.id;
-
-          // Definir a nova mãe como mãe do filho
-          filho.id_mae = nova_mae.id;
-          nova_mae.filhos.push_back(id_filho);
-
-          cout << nova_mae.nome << " criada como mãe de " << filho.nome << " e cônjuge de " << parente.nome << " (ID: " << nova_mae.id << ")" << endl;
-        }
-      }
+      processarDefinicaoMae(arvore, parente, filho);
     }
-
   }
   else if (parente.genero == 'F') {
-    // Parente é mulher - será a mãe
-    filho.id_mae = id_parente;
-    parente.filhos.push_back(id_filho);
-
-    // Remover duplicatas
-    sort(parente.filhos.begin(), parente.filhos.end());
-    parente.filhos.erase(unique(parente.filhos.begin(), parente.filhos.end()), parente.filhos.end());
-
+    definirParenteComoMae(arvore, filho, id_parente);
     cout << parente.nome << " definida como mãe de " << filho.nome << endl;
 
-    // Verificar se precisa definir pai
     if (filho.id_pai == 0) {
-      if (parente.id_conjuge > 0) {
-        // Tem cônjuge - definir automaticamente como pai
-        filho.id_pai = parente.id_conjuge;
-        arvore[parente.id_conjuge].filhos.push_back(id_filho);
-
-        // Remover duplicatas
-        auto& filhos_pai = arvore[parente.id_conjuge].filhos;
-        sort(filhos_pai.begin(), filhos_pai.end());
-        filhos_pai.erase(unique(filhos_pai.begin(), filhos_pai.end()), filhos_pai.end());
-
-        cout << arvore[parente.id_conjuge].nome << " definido automaticamente como pai (cônjuge da mãe)" << endl;
-      }
-      else {
-        // Não tem cônjuge - perguntar se quer definir pai
-        char resposta;
-        cout << parente.nome << " não tem cônjuge. Deseja definir um pai para " << filho.nome << "? (s/n): ";
-        cin >> resposta;
-
-        if (resposta == 's' || resposta == 'S') {
-          // Criar nova pessoa automaticamente como pai
-          Pessoa novo_pai;
-          novo_pai.id = obterProximoId(arvore);
-
-          cout << "Criando nova pessoa como pai de " << filho.nome << endl;
-          cout << "Nome do pai: ";
-          cin.ignore();
-          getline(cin, novo_pai.nome);
-
-          novo_pai.genero = 'M'; // Gênero oposto à mãe
-          novo_pai.id_pai = 0;
-          novo_pai.id_mae = 0;
-          novo_pai.id_conjuge = id_parente; // Definir como cônjuge da mãe
-
-          // Adicionar novo pai à árvore
-          arvore[novo_pai.id] = novo_pai;
-
-          // Atualizar a mãe para ter este pai como cônjuge
-          parente.id_conjuge = novo_pai.id;
-
-          // Definir o novo pai como pai do filho
-          filho.id_pai = novo_pai.id;
-          novo_pai.filhos.push_back(id_filho);
-
-          cout << novo_pai.nome << " criado como pai de " << filho.nome << " e cônjuge de " << parente.nome << " (ID: " << novo_pai.id << ")" << endl;
-        }
-      }
+      processarDefinicaoPai(arvore, parente, filho);
     }
   }
 
@@ -457,6 +443,22 @@ void salvarCSV(const map<int, Pessoa>& arvore, const string& filename) {
   cout << "Dados salvos em " << filename << " com sucesso!" << endl;
 }
 
+void adicionarPessoaInterativo(map<int, Pessoa>& arvore) {
+  Pessoa nova;
+  nova.id = 0;
+
+  cout << "Nome: ";
+  cin.ignore();
+  getline(cin, nova.nome);
+
+  nova.genero = solicitarGeneroValido();
+  nova.id_pai = 0;
+  nova.id_mae = 0;
+  nova.id_conjuge = 0;
+
+  adicionarPessoa(arvore, nova);
+}
+
 void menuInterativo(map<int, Pessoa>& arvore) {
   int opcao;
 
@@ -472,34 +474,9 @@ void menuInterativo(map<int, Pessoa>& arvore) {
     cin >> opcao;
 
     switch (opcao) {
-    case 1: {
-      Pessoa nova;
-      // Não pedir ID - será gerado automaticamente
-      nova.id = 0; // Será sobrescrito pela função adicionarPessoa
-
-      cout << "Nome: ";
-      cin.ignore();
-      getline(cin, nova.nome);
-
-      cout << "Gênero (M/F): ";
-      cin >> nova.genero;
-      nova.genero = toupper(nova.genero);
-      // Validar gênero
-      while (nova.genero != 'M' && nova.genero != 'F') {
-
-        cout << "Gênero inválido! Digite M ou F: ";
-        cin >> nova.genero;
-        nova.genero = toupper(nova.genero);
-      }
-
-      // Não pedir pais aqui - serão definidos depois
-      nova.id_pai = 0;
-      nova.id_mae = 0;
-      nova.id_conjuge = 0;
-
-      adicionarPessoa(arvore, nova);
+    case 1:
+      adicionarPessoaInterativo(arvore);
       break;
-    }
     case 2: {
       int id_filho;
       cout << "Digite o ID da pessoa que deseja definir os pais: ";
