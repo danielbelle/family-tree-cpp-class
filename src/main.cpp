@@ -539,6 +539,7 @@ int buscarPessoaInterativo(const map<int, Pessoa>& arvore) {
   cout << "\n=== BUSCAR PESSOA ===" << endl;
   cout << "1. Buscar por ID" << endl;
   cout << "2. Buscar por nome" << endl;
+  cout << "0. Cancelar" << endl;
   cout << "Escolha: ";
   cin >> opcao_busca;
 
@@ -649,6 +650,242 @@ void exibirAscendentesEDescendentes(map<int, Pessoa>& arvore) {
   cout << "Número de descendentes diretos: " << pessoa.filhos.size() << endl;
 }
 
+// Função para calcular o nível de parentesco entre duas pessoas (distância em nós)
+int calcularParentesco(const map<int, Pessoa>& arvore, int pessoa1_id, int pessoa2_id) {
+  if (arvore.find(pessoa1_id) == arvore.end() || arvore.find(pessoa2_id) == arvore.end()) {
+    return -1; // Pessoa não encontrada
+  }
+
+  if (pessoa1_id == pessoa2_id) {
+    return 0; // Mesma pessoa
+  }
+
+  // Usar BFS para encontrar o caminho mais curto
+  queue<pair<int, int>> fila; // (pessoa_id, distancia)
+  set<int> visitados;
+
+  fila.push({ pessoa1_id, 0 });
+  visitados.insert(pessoa1_id);
+
+  while (!fila.empty()) {
+    auto [atual, distancia] = fila.front();
+    fila.pop();
+
+    const Pessoa& p = arvore.at(atual);
+
+    // Verificar pais
+    vector<int> parentes;
+    if (p.id_pai > 0) parentes.push_back(p.id_pai);
+    if (p.id_mae > 0) parentes.push_back(p.id_mae);
+    if (p.id_conjuge > 0) parentes.push_back(p.id_conjuge);
+
+    // Adicionar filhos
+    for (int filho_id : p.filhos) {
+      parentes.push_back(filho_id);
+    }
+
+    for (int parente_id : parentes) {
+      if (parente_id == pessoa2_id) {
+        return distancia + 1; // Encontrou!
+      }
+
+      if (visitados.find(parente_id) == visitados.end() && arvore.find(parente_id) != arvore.end()) {
+        visitados.insert(parente_id);
+        fila.push({ parente_id, distancia + 1 });
+      }
+    }
+  }
+
+  return -1; // Não há parentesco
+}
+
+// Função para contar o número de descendentes diretos e indiretos
+int contarDescendentes(const map<int, Pessoa>& arvore, int pessoa_id) {
+  if (arvore.find(pessoa_id) == arvore.end()) {
+    return 0;
+  }
+
+  int total = 0;
+  function<void(int)> contar = [&](int id) {
+    const Pessoa& p = arvore.at(id);
+    for (int filho_id : p.filhos) {
+      total++;
+      contar(filho_id);
+    }
+    };
+
+  contar(pessoa_id);
+  return total;
+}
+
+// Função para mostrar gerações separadas por nível
+void exibirGeracoesPorNivel(const map<int, Pessoa>& arvore, int pessoa_id) {
+  if (arvore.find(pessoa_id) == arvore.end()) return;
+
+  queue<pair<int, int>> fila; // (pessoa_id, nivel)
+  fila.push({ pessoa_id, 0 });
+
+  int nivel_atual = 0;
+
+  while (!fila.empty()) {
+    auto [atual, nivel] = fila.front();
+    fila.pop();
+
+    const Pessoa& p = arvore.at(atual);
+
+    // Se mudou de nível, imprime cabeçalho
+    if (nivel > nivel_atual) {
+      nivel_atual = nivel;
+      cout << "\n--- GERAÇÃO " << nivel << " ---" << endl;
+    }
+
+    // Imprime a pessoa
+    cout << "  " << p.nome << " (" << p.genero << ") [ID: " << p.id << "]";
+    if (p.id_conjuge > 0 && arvore.find(p.id_conjuge) != arvore.end()) {
+      const Pessoa& conjuge = arvore.at(p.id_conjuge);
+      cout << " 💑 " << conjuge.nome;
+    }
+    cout << endl;
+
+    // Adiciona filhos à fila
+    for (int filho_id : p.filhos) {
+      fila.push({ filho_id, nivel + 1 });
+    }
+  }
+}
+
+// Função interativa para exibir nível de parentesco
+void exibirNivelParentesco(map<int, Pessoa>& arvore) {
+  cout << "\n=== NÍVEL DE PARENTESCO ENTRE DUAS PESSOAS ===" << endl;
+
+  cout << "Primeira pessoa:" << endl;
+  int pessoa1_id = buscarPessoaInterativo(arvore);
+  if (pessoa1_id == -1) return;
+
+  cout << "\nSegunda pessoa:" << endl;
+  int pessoa2_id = buscarPessoaInterativo(arvore);
+  if (pessoa2_id == -1) return;
+
+  const Pessoa& p1 = arvore.at(pessoa1_id);
+  const Pessoa& p2 = arvore.at(pessoa2_id);
+
+  int nivel = calcularParentesco(arvore, pessoa1_id, pessoa2_id);
+
+  cout << "\n=== RESULTADO ===" << endl;
+  cout << "Pessoa 1: " << p1.nome << " (ID: " << p1.id << ")" << endl;
+  cout << "Pessoa 2: " << p2.nome << " (ID: " << p2.id << ")" << endl;
+
+  if (nivel == -1) {
+    cout << "❌ Não há parentesco entre as duas pessoas." << endl;
+  }
+  else if (nivel == 0) {
+    cout << "👤 São a mesma pessoa!" << endl;
+  }
+  else {
+    cout << "📏 Nível de parentesco: " << nivel << " grau(s) de separação" << endl;
+
+    // Descrição do parentesco
+    if (nivel == 1) {
+      // Verificar relação direta
+      const Pessoa& p1 = arvore.at(pessoa1_id);
+      const Pessoa& p2 = arvore.at(pessoa2_id);
+
+      if (p1.id_pai == pessoa2_id || p1.id_mae == pessoa2_id) {
+        cout << "   👶 " << p1.nome << " é filho(a) de " << p2.nome << endl;
+      }
+      else if (p2.id_pai == pessoa1_id || p2.id_mae == pessoa1_id) {
+        cout << "   👨‍👧 " << p1.nome << " é pai/mãe de " << p2.nome << endl;
+      }
+      else if (p1.id_conjuge == pessoa2_id) {
+        cout << "   💑 " << p1.nome << " é cônjuge de " << p2.nome << endl;
+      }
+      else {
+        bool encontrou = false;
+        for (int filho_id : p1.filhos) {
+          if (filho_id == pessoa2_id) {
+            cout << "   👨‍👧 " << p1.nome << " é pai/mãe de " << p2.nome << endl;
+            encontrou = true;
+            break;
+          }
+        }
+        if (!encontrou) {
+          cout << "   🔗 Parentesco direto" << endl;
+        }
+      }
+    }
+    else if (nivel == 2) {
+      cout << "   👥 Parentesco de segundo grau (avós/netos, tios/sobrinhos)" << endl;
+    }
+    else if (nivel == 3) {
+      cout << "   👥 Parentesco de terceiro grau (bisavós/bisnetos, primos)" << endl;
+    }
+    else {
+      cout << "   👥 Parentesco distante" << endl;
+    }
+  }
+}
+
+// Função interativa para exibir contagem de descendentes
+void exibirContagemDescendentes(map<int, Pessoa>& arvore) {
+  cout << "\n=== CONTAGEM DE DESCENDENTES ===" << endl;
+
+  int pessoa_id = buscarPessoaInterativo(arvore);
+  if (pessoa_id == -1) return;
+
+  const Pessoa& pessoa = arvore.at(pessoa_id);
+  int total_descendentes = contarDescendentes(arvore, pessoa_id);
+  int filhos_diretos = pessoa.filhos.size();
+  int filhos_indiretos = total_descendentes - filhos_diretos;
+
+  cout << "\n=== RESULTADO ===" << endl;
+  cout << "Pessoa: " << pessoa.nome << " (ID: " << pessoa.id << ")" << endl;
+  cout << "📊 ESTATÍSTICAS DE DESCENDENTES:" << endl;
+  cout << "   • Filhos diretos: " << filhos_diretos << endl;
+  cout << "   • Descendentes indiretos: " << filhos_indiretos << endl;
+  cout << "   • TOTAL de descendentes: " << total_descendentes << endl;
+
+  if (filhos_diretos > 0) {
+    cout << "\n👶 FILHOS DIRETOS:" << endl;
+    for (int filho_id : pessoa.filhos) {
+      const Pessoa& filho = arvore.at(filho_id);
+      int netos = contarDescendentes(arvore, filho_id);
+      cout << "   • " << filho.nome << " (ID: " << filho.id << ")";
+      if (netos > 0) {
+        cout << " → " << netos << " descendente(s)";
+      }
+      cout << endl;
+    }
+  }
+}
+
+// Função interativa para exibir gerações separadas por nível
+void exibirGeracoesSeparadas(map<int, Pessoa>& arvore) {
+  cout << "\n=== GERAÇÕES SEPARADAS POR NÍVEL ===" << endl;
+
+  int pessoa_id = buscarPessoaInterativo(arvore);
+  if (pessoa_id == -1) return;
+
+  const Pessoa& pessoa = arvore.at(pessoa_id);
+
+  cout << "\n=== GERAÇÕES A PARTIR DE " << pessoa.nome << " ===" << endl;
+  cout << "Ancestral: " << pessoa.nome << " (" << pessoa.genero << ") [ID: " << pessoa.id << "]" << endl;
+
+  if (pessoa.id_conjuge > 0 && arvore.find(pessoa.id_conjuge) != arvore.end()) {
+    const Pessoa& conjuge = arvore.at(pessoa.id_conjuge);
+    cout << "Cônjuge: " << conjuge.nome << " (" << conjuge.genero << ") [ID: " << conjuge.id << "]" << endl;
+  }
+
+  cout << "=====================================" << endl;
+
+  exibirGeracoesPorNivel(arvore, pessoa_id);
+
+  // Estatísticas
+  int total_descendentes = contarDescendentes(arvore, pessoa_id);
+  cout << "\n--- ESTATÍSTICAS ---" << endl;
+  cout << "Total de descendentes: " << total_descendentes << endl;
+}
+
+// Atualização do menuInterativo para incluir as novas funções
 void menuInterativo(map<int, Pessoa>& arvore) {
   int opcao;
 
@@ -662,6 +899,9 @@ void menuInterativo(map<int, Pessoa>& arvore) {
     cout << "6. Exibir ascendentes e descendentes" << endl;
     cout << "7. Buscar pessoa por nome" << endl;
     cout << "8. Listar árvore desde ancestral" << endl;
+    cout << "9. Nível de parentesco entre duas pessoas" << endl;      // NOVA
+    cout << "10. Contar descendentes de uma pessoa" << endl;          // NOVA
+    cout << "11. Exibir gerações por nível" << endl;                  // NOVA
     cout << "0. Sair" << endl;
     cout << "Escolha: ";
     cin >> opcao;
@@ -727,6 +967,15 @@ void menuInterativo(map<int, Pessoa>& arvore) {
     }
     case 8:
       listarArvoreDesdeAncestral(arvore);
+      break;
+    case 9:  // NOVO
+      exibirNivelParentesco(arvore);
+      break;
+    case 10: // NOVO
+      exibirContagemDescendentes(arvore);
+      break;
+    case 11: // NOVO
+      exibirGeracoesSeparadas(arvore);
       break;
     case 0:
       cout << "Saindo do menu interativo..." << endl;

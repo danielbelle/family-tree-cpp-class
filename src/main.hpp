@@ -9,6 +9,8 @@
 #include <map>
 #include <algorithm>
 #include <functional>
+#include <queue>
+#include <set>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -61,5 +63,13 @@ void exibirLinhaDescendencia(const map<int, Pessoa>& arvore, int pessoa_id, int 
 void exibirAscendentesEDescendentes(map<int, Pessoa>& arvore);
 void listarArvoreDesdeAncestral(map<int, Pessoa>& arvore);
 int buscarPessoaInterativo(const map<int, Pessoa>& arvore);
+
+// Novas funções
+int calcularParentesco(const map<int, Pessoa>& arvore, int pessoa1_id, int pessoa2_id);
+int contarDescendentes(const map<int, Pessoa>& arvore, int pessoa_id);
+void exibirGeracoesPorNivel(const map<int, Pessoa>& arvore, int pessoa_id);
+void exibirNivelParentesco(map<int, Pessoa>& arvore);
+void exibirContagemDescendentes(map<int, Pessoa>& arvore);
+void exibirGeracoesSeparadas(map<int, Pessoa>& arvore);
 
 #endif
