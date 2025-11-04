@@ -1,12 +1,9 @@
 #include "main.hpp"
 
-
 int main() {
-
 #ifdef _WIN32
   SetConsoleOutputCP(CP_UTF8);
 #endif
-#include "main.hpp"
 
   cout << "=== SISTEMA DE ÁRVORE GENEALÓGICA ===" << endl;
 
@@ -44,6 +41,10 @@ int main() {
   cout << "\n=== ÁRVORE GENEALÓGICA ===" << endl;
   vector<bool> ultimos;
   imprimirArvore(arvore, raiz_id, 0, ultimos);
+
+  // Menu interativo para adicionar pessoas e relações
+  cout << "\n=== MODO INTERATIVO ===" << endl;
+  menuInterativo(arvore);
 
   return 0;
 }
@@ -170,7 +171,7 @@ void imprimirArvore(const map<int, Pessoa>& arvore, int pessoa_id, int nivel, ve
   // Se tem conjuge, imprime também
   if (p.id_conjuge > 0 && arvore.find(p.id_conjuge) != arvore.end()) {
     const Pessoa& conjuge = arvore.at(p.id_conjuge);
-    cout << " 💑 " << conjuge.nome << " (" << conjuge.genero << ")";
+    cout << " 💑 " << conjuge.nome << " (" << conjuge.genero << ") [ID: " << conjuge.id << "]";
   }
   cout << endl;
 
@@ -219,4 +220,308 @@ bool validarArvore(const map<int, Pessoa>& arvore) {
 
   cout << "Árvore validada com sucesso!" << endl;
   return true;
+}
+
+int obterProximoId(const map<int, Pessoa>& arvore) {
+  if (arvore.empty()) {
+    return 1; // Primeiro ID se a árvore estiver vazia
+  }
+
+  // Encontrar o maior ID atual
+  int maior_id = 0;
+  for (const auto& par : arvore) {
+    if (par.first > maior_id) {
+      maior_id = par.first;
+    }
+  }
+
+  return maior_id + 1; // Próximo ID disponível
+}
+
+void adicionarPessoa(map<int, Pessoa>& arvore, const Pessoa& nova_pessoa) {
+  // Criar uma cópia da pessoa com ID gerado automaticamente
+  Pessoa pessoa_com_id = nova_pessoa;
+  pessoa_com_id.id = obterProximoId(arvore);
+
+  // Adicionar nova pessoa
+  arvore[pessoa_com_id.id] = pessoa_com_id;
+
+  // Atualizar relações com pais se especificados
+  if (pessoa_com_id.id_pai > 0 && arvore.find(pessoa_com_id.id_pai) != arvore.end()) {
+    arvore[pessoa_com_id.id_pai].filhos.push_back(pessoa_com_id.id);
+    // Remover duplicatas
+    auto& filhos_pai = arvore[pessoa_com_id.id_pai].filhos;
+    sort(filhos_pai.begin(), filhos_pai.end());
+    filhos_pai.erase(unique(filhos_pai.begin(), filhos_pai.end()), filhos_pai.end());
+  }
+
+  if (pessoa_com_id.id_mae > 0 && arvore.find(pessoa_com_id.id_mae) != arvore.end()) {
+    arvore[pessoa_com_id.id_mae].filhos.push_back(pessoa_com_id.id);
+    // Remover duplicatas
+    auto& filhos_mae = arvore[pessoa_com_id.id_mae].filhos;
+    sort(filhos_mae.begin(), filhos_mae.end());
+    filhos_mae.erase(unique(filhos_mae.begin(), filhos_mae.end()), filhos_mae.end());
+  }
+
+  cout << "Pessoa " << pessoa_com_id.nome << " adicionada com sucesso! (ID: " << pessoa_com_id.id << ")" << endl;
+}
+
+void definirPais(map<int, Pessoa>& arvore, int id_filho) {
+  // Verificar se o filho existe
+  if (arvore.find(id_filho) == arvore.end()) {
+    cout << "Erro: Pessoa com ID " << id_filho << " não encontrada!" << endl;
+    return;
+  }
+
+  Pessoa& filho = arvore[id_filho];
+
+  cout << "\nDefinindo pais para: " << filho.nome << " (ID: " << id_filho << ")" << endl;
+
+  // Verificar se já tem pai e mãe
+  if (filho.id_pai > 0 && filho.id_mae > 0) {
+    cout << "Esta pessoa já tem ambos os pais definidos!" << endl;
+    cout << "Pai: " << arvore[filho.id_pai].nome << " (ID: " << filho.id_pai << ")" << endl;
+    cout << "Mãe: " << arvore[filho.id_mae].nome << " (ID: " << filho.id_mae << ")" << endl;
+    return;
+  }
+
+  int id_parente;
+  cout << "Digite o ID do pai ou mãe existente: ";
+  cin >> id_parente;
+
+  // Verificar se o parente existe
+  if (arvore.find(id_parente) == arvore.end()) {
+    cout << "Erro: Pessoa com ID " << id_parente << " não encontrada!" << endl;
+    return;
+  }
+
+  Pessoa& parente = arvore[id_parente];
+  cout << "Parente selecionado: " << parente.nome << " (" << parente.genero << ") [ID: " << id_parente << "]";
+
+  // Verificar se tem cônjuge
+  if (parente.id_conjuge > 0) {
+    Pessoa& conjuge = arvore[parente.id_conjuge];
+    cout << " 💑 " << conjuge.nome << " (" << conjuge.genero << ")" << endl;
+  }
+  else {
+    cout << " (sem cônjuge)" << endl;
+  }
+
+  // Definir relação baseada no gênero do parente
+  if (parente.genero == 'M') {
+    // Parente é homem - será o pai
+    filho.id_pai = id_parente;
+    parente.filhos.push_back(id_filho);
+
+    // Remover duplicatas
+    sort(parente.filhos.begin(), parente.filhos.end());
+    parente.filhos.erase(unique(parente.filhos.begin(), parente.filhos.end()), parente.filhos.end());
+
+    cout << parente.nome << " definido como pai de " << filho.nome << endl;
+
+    // Verificar se precisa definir mãe
+    if (filho.id_mae == 0) {
+      if (parente.id_conjuge > 0) {
+        // Tem cônjuge - definir automaticamente como mãe
+        filho.id_mae = parente.id_conjuge;
+        arvore[parente.id_conjuge].filhos.push_back(id_filho);
+
+        // Remover duplicatas
+        auto& filhos_mae = arvore[parente.id_conjuge].filhos;
+        sort(filhos_mae.begin(), filhos_mae.end());
+        filhos_mae.erase(unique(filhos_mae.begin(), filhos_mae.end()), filhos_mae.end());
+
+        cout << arvore[parente.id_conjuge].nome << " definida automaticamente como mãe (cônjuge do pai)" << endl;
+      }
+      else {
+        // Não tem cônjuge - perguntar se quer definir mãe
+        char resposta;
+        cout << parente.nome << " não tem cônjuge. Deseja definir uma mãe para " << filho.nome << "? (s/n): ";
+        cin >> resposta;
+
+        if (resposta == 's' || resposta == 'S') {
+          int id_mae;
+          cout << "Digite o ID da mãe: ";
+          cin >> id_mae;
+
+          if (arvore.find(id_mae) != arvore.end()) {
+            filho.id_mae = id_mae;
+            arvore[id_mae].filhos.push_back(id_filho);
+
+            // Remover duplicatas
+            auto& filhos_mae = arvore[id_mae].filhos;
+            sort(filhos_mae.begin(), filhos_mae.end());
+            filhos_mae.erase(unique(filhos_mae.begin(), filhos_mae.end()), filhos_mae.end());
+
+            cout << arvore[id_mae].nome << " definida como mãe de " << filho.nome << endl;
+          }
+          else {
+            cout << "Erro: ID da mãe não encontrado!" << endl;
+          }
+        }
+      }
+    }
+
+  }
+  else if (parente.genero == 'F') {
+    // Parente é mulher - será a mãe
+    filho.id_mae = id_parente;
+    parente.filhos.push_back(id_filho);
+
+    // Remover duplicatas
+    sort(parente.filhos.begin(), parente.filhos.end());
+    parente.filhos.erase(unique(parente.filhos.begin(), parente.filhos.end()), parente.filhos.end());
+
+    cout << parente.nome << " definida como mãe de " << filho.nome << endl;
+
+    // Verificar se precisa definir pai
+    if (filho.id_pai == 0) {
+      if (parente.id_conjuge > 0) {
+        // Tem cônjuge - definir automaticamente como pai
+        filho.id_pai = parente.id_conjuge;
+        arvore[parente.id_conjuge].filhos.push_back(id_filho);
+
+        // Remover duplicatas
+        auto& filhos_pai = arvore[parente.id_conjuge].filhos;
+        sort(filhos_pai.begin(), filhos_pai.end());
+        filhos_pai.erase(unique(filhos_pai.begin(), filhos_pai.end()), filhos_pai.end());
+
+        cout << arvore[parente.id_conjuge].nome << " definido automaticamente como pai (cônjuge da mãe)" << endl;
+      }
+      else {
+        // Não tem cônjuge - perguntar se quer definir pai
+        char resposta;
+        cout << parente.nome << " não tem cônjuge. Deseja definir um pai para " << filho.nome << "? (s/n): ";
+        cin >> resposta;
+
+        if (resposta == 's' || resposta == 'S') {
+          int id_pai;
+          cout << "Digite o ID do pai: ";
+          cin >> id_pai;
+
+          if (arvore.find(id_pai) != arvore.end()) {
+            filho.id_pai = id_pai;
+            arvore[id_pai].filhos.push_back(id_filho);
+
+            // Remover duplicatas
+            auto& filhos_pai = arvore[id_pai].filhos;
+            sort(filhos_pai.begin(), filhos_pai.end());
+            filhos_pai.erase(unique(filhos_pai.begin(), filhos_pai.end()), filhos_pai.end());
+
+            cout << arvore[id_pai].nome << " definido como pai de " << filho.nome << endl;
+          }
+          else {
+            cout << "Erro: ID do pai não encontrado!" << endl;
+          }
+        }
+      }
+    }
+  }
+
+  cout << "Relações de parentesco definidas com sucesso!" << endl;
+}
+
+void salvarCSV(const map<int, Pessoa>& arvore, const string& filename) {
+  ofstream arquivo(filename);
+
+  if (!arquivo.is_open()) {
+    cout << "Erro ao abrir arquivo para salvar: " << filename << endl;
+    return;
+  }
+
+  // Escrever cabeçalho
+  arquivo << "id,nome,genero,id_pai,id_mae,id_conjuge" << endl;
+
+  // Escrever dados
+  for (const auto& par : arvore) {
+    const Pessoa& p = par.second;
+    arquivo << p.id << "," << p.nome << "," << p.genero << ","
+      << p.id_pai << "," << p.id_mae << "," << p.id_conjuge << endl;
+  }
+
+  arquivo.close();
+  cout << "Dados salvos em " << filename << " com sucesso!" << endl;
+}
+
+void menuInterativo(map<int, Pessoa>& arvore) {
+  int opcao;
+
+  do {
+    cout << "\n=== MENU INTERATIVO ===" << endl;
+    cout << "1. Adicionar nova pessoa" << endl;
+    cout << "2. Definir pais para uma pessoa" << endl;
+    cout << "3. Salvar alterações no CSV" << endl;
+    cout << "4. Visualizar árvore atual" << endl;
+    cout << "5. Listar todas as pessoas" << endl;
+    cout << "0. Sair" << endl;
+    cout << "Escolha: ";
+    cin >> opcao;
+
+    switch (opcao) {
+    case 1: {
+      Pessoa nova;
+      // Não pedir ID - será gerado automaticamente
+      nova.id = 0; // Será sobrescrito pela função adicionarPessoa
+
+      cout << "Nome: ";
+      cin.ignore();
+      getline(cin, nova.nome);
+
+      cout << "Gênero (M/F): ";
+      cin >> nova.genero;
+      nova.genero = toupper(nova.genero);
+      // Validar gênero
+      while (nova.genero != 'M' && nova.genero != 'F') {
+
+        cout << "Gênero inválido! Digite M ou F: ";
+        cin >> nova.genero;
+        nova.genero = toupper(nova.genero);
+      }
+
+      // Não pedir pais aqui - serão definidos depois
+      nova.id_pai = 0;
+      nova.id_mae = 0;
+      nova.id_conjuge = 0;
+
+      adicionarPessoa(arvore, nova);
+      break;
+    }
+    case 2: {
+      int id_filho;
+      cout << "Digite o ID da pessoa que deseja definir os pais: ";
+      cin >> id_filho;
+      definirPais(arvore, id_filho);
+      break;
+    }
+    case 3:
+      salvarCSV(arvore, "dados/dados.csv");
+      break;
+    case 4: {
+      int raiz_id;
+      encontrarRaiz(arvore, raiz_id);
+      vector<bool> ultimos;
+      cout << "\n=== ÁRVORE ATUAL ===" << endl;
+      imprimirArvore(arvore, raiz_id, 0, ultimos);
+      break;
+    }
+    case 5: {
+      cout << "\n=== LISTA DE PESSOAS ===" << endl;
+      for (const auto& par : arvore) {
+        const Pessoa& p = par.second;
+        cout << "ID: " << p.id << " | " << p.nome << " (" << p.genero << ")";
+        if (p.id_pai > 0) cout << " | Pai: " << p.id_pai;
+        if (p.id_mae > 0) cout << " | Mãe: " << p.id_mae;
+        if (p.id_conjuge > 0) cout << " | Cônjuge: " << p.id_conjuge;
+        cout << " | Filhos: " << p.filhos.size();
+        cout << endl;
+      }
+      break;
+    }
+    case 0:
+      cout << "Saindo do menu interativo..." << endl;
+      break;
+    default:
+      cout << "Opção inválida!" << endl;
+    }
+  } while (opcao != 0);
 }

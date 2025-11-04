@@ -32,4 +32,11 @@ void encontrarRaiz(map<int, Pessoa>& arvore, int& raiz_id);
 void imprimirArvore(const map<int, Pessoa>& arvore, int pessoa_id, int nivel, vector<bool>& ultimos);
 bool validarArvore(const map<int, Pessoa>& arvore);
 
+// Novas funções para manipulação dinâmica
+int obterProximoId(const map<int, Pessoa>& arvore);
+void adicionarPessoa(map<int, Pessoa>& arvore, const Pessoa& nova_pessoa);
+void definirPais(map<int, Pessoa>& arvore, int id_filho);
+void salvarCSV(const map<int, Pessoa>& arvore, const string& filename);
+void menuInterativo(map<int, Pessoa>& arvore);
+
 #endif
