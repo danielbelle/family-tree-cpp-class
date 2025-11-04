@@ -1,40 +1,41 @@
-cmake_minimum_required(VERSION 3.16)
-project(family_tree)
+cmake_minimum_required(VERSION 3.10)
+project(family-tree)
 
-# Configurar para MinGW
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED OFF)
-
-# Configurar diretórios de include
-include_directories(
-    ${CMAKE_SOURCE_DIR}/include
-)
-
-# Encontrar todos os arquivos .cpp recursivamente
-file(GLOB_RECURSE SOURCE_FILES 
-    "src/*.cpp"
-    "src/*/*.cpp"
-    "src/*/*/*.cpp"
-)
-
-# Criar executável
-add_executable(${PROJECT_NAME} 
-    ${SOURCE_FILES}
-)
-
-# Configurações de compilação
-target_compile_options(${PROJECT_NAME} PRIVATE 
-    -Wall 
-    -Wextra 
-    -std=c++17
-)
-
+# Forçar MinGW no Windows
 if(WIN32)
-    target_compile_options(${PROJECT_NAME} PRIVATE -municode)
+    # Definir o compilador MinGW explicitamente
+    set(CMAKE_C_COMPILER "gcc")
+    set(CMAKE_CXX_COMPILER "g++")
+    set(CMAKE_MAKE_PROGRAM "mingw32-make")
+    
+    # Usar generator MinGW
+    set(CMAKE_GENERATOR "MinGW Makefiles")
 endif()
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Configurações específicas por compilador
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    # Flags para GCC/MinGW
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+elseif(MSVC)
+    # Flags para Visual Studio
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8")
+endif()
+
+# Arquivos fonte
+set(SOURCES
+    src/main.cpp
+    src/pessoa.cpp
+    src/csv_reader.cpp
+    src/familia.cpp
+)
+
+add_executable(family-tree ${SOURCES})
+target_include_directories(family-tree PRIVATE src)
+
 # Mensagem de status
-message(STATUS "=== CONFIGURAÇÃO MODULAR ===")
-message(STATUS "Projeto: ${PROJECT_NAME}")
-message(STATUS "Arquivos fonte encontrados: ${SOURCE_FILES}")
-message(STATUS "=============================")
+message(STATUS "Compiler: ${CMAKE_CXX_COMPILER}")
+message(STATUS "Generator: ${CMAKE_GENERATOR}")

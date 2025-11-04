@@ -1,0 +1,7 @@
+idPessoa,nome,genero,familia,idFamilia,conjuge,idConjuge,pai,idPai,mae,idMae
+p1,João Silva,M,Silva,f1,,,,,,
+p2,Maria Santos,F,Silva,f1,João Silva,p1,,,,
+p3,Pedro Silva,M,Silva,f1,,,João Silva,p1,Maria Santos,p2
+p4,Ana Silva,F,Silva,f1,,,João Silva,p1,Maria Santos,p2
+p5,Carlos Oliveira,M,Oliveira,f2,,,,,,
+p6,Julia Mendes,F,Oliveira,f2,Carlos Oliveira,p5,,,,

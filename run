@@ -1,0 +1,74 @@
+#!/bin/bash
+echo "=== REBUILD FAMILY TREE ==="
+echo "Detectando ambiente..."
+
+# Verificar se compiladores estão disponíveis
+if ! command -v g++ &> /dev/null; then
+    echo "ERRO: g++ não encontrado no PATH"
+    echo "Certifique-se que MinGW está instalado e no PATH"
+    exit 1
+fi
+
+if ! command -v cmake &> /dev/null; then
+    echo "ERRO: cmake não encontrado"
+    exit 1
+fi
+
+echo "Compilador: $(g++ --version | head -1)"
+echo "CMake: $(cmake --version | head -1)"
+
+# Limpar build anterior
+if [ -d "build" ]; then
+    echo "Removendo build anterior..."
+    rm -rf build
+fi
+
+# Criar pasta build
+echo "Criando novo build..."
+mkdir -p build
+cd build
+
+# Forçar MinGW no Windows
+if [[ "$OS" == "Windows_NT" ]]; then
+    echo "Windows detectado - usando MinGW Makefiles"
+    cmake -G "MinGW Makefiles" ..
+else
+    echo "Unix-like system - usando Makefiles padrão"
+    cmake ..
+fi
+
+if [ $? -eq 0 ]; then
+    echo "Compilando projeto..."
+    
+    # Usar make ou mingw32-make conforme disponível
+    if command -v mingw32-make &> /dev/null; then
+        mingw32-make
+    else
+        make
+    fi
+    
+    if [ $? -eq 0 ]; then
+        echo
+        echo "=== BUILD SUCESSO ==="
+        cd ..
+        
+        # Encontrar o executável
+        if [ -f "build/family-tree.exe" ]; then
+            echo "Executando programa..."
+            ./build/family-tree.exe
+        elif [ -f "build/family-tree" ]; then
+            echo "Executando programa..."
+            ./build/family-tree
+        else
+            echo "Executável não encontrado nos locais esperados"
+            echo "Procurando executável..."
+            find build -name "family-tree*" -type f -executable
+        fi
+    else
+        echo "ERRO: Falha na compilação"
+        cd ..
+    fi
+else
+    echo "ERRO: Falha na configuração do CMake"
+    cd ..
+fi
