@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script de exportação para o projeto Family Tree
+# Script de exportação automática para o projeto Family Tree
 # Local: doc/export.sh
 # Saída: build/export.txt
 
@@ -12,10 +12,18 @@ echo "Diretório raiz do projeto: $PROJECT_ROOT"
 OUTPUT_FILE="$PROJECT_ROOT/build/export.txt"
 PROJECT_NAME="family_tree"
 
+# CONFIGURAÇÕES DE EXCLUSÃO - EDITAR CONFORME NECESSÁRIO
+# Pastas que serão completamente ignoradas (separadas por espaço)
+EXCLUIR_PASTAS="build .git .vscode .idea"
+# Arquivos específicos para excluir (separados por espaço)
+EXCLUIR_ARQUIVOS="export.txt .gitignore README.md"
+# Extensões de arquivo para excluir (separadas por espaço)
+EXCLUIR_EXTENSOES=".tmp .log .bak"
+
 # Obter data atual
 DATA_ATUAL=$(date +"%d/%m/%Y %H:%M:%S")
 
-echo "=== EXPORTAÇÃO DO PROJETO ==="
+echo "=== EXPORTAÇÃO AUTOMÁTICA DO PROJETO ==="
 echo ""
 
 # Verificar se a pasta build existe
@@ -30,40 +38,56 @@ echo "PROJETO: $PROJECT_NAME" > "$OUTPUT_FILE"
 echo "Data: $DATA_ATUAL" >> "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
 
+# Construir comando find com exclusões
+COMANDO_FIND="find \"$PROJECT_ROOT\" -type f"
+
+# Adicionar exclusões de pastas
+for pasta in $EXCLUIR_PASTAS; do
+    COMANDO_FIND="$COMANDO_FIND -not -path \"*/$pasta/*\""
+done
+
+# Adicionar exclusões de arquivos
+for arquivo in $EXCLUIR_ARQUIVOS; do
+    COMANDO_FIND="$COMANDO_FIND -not -name \"$arquivo\""
+done
+
+# Adicionar exclusões de extensões
+for extensao in $EXCLUIR_EXTENSOES; do
+    COMANDO_FIND="$COMANDO_FIND -not -name \"*$extensao\""
+done
+
+# Encontrar todos os arquivos automaticamente
+echo "🔍 Procurando arquivos no projeto..."
+ARQUIVOS_ENCONTRADOS=()
+while IFS= read -r -d '' arquivo; do
+    ARQUIVOS_ENCONTRADOS+=("$arquivo")
+done < <(eval "$COMANDO_FIND -print0")
+
 # Estrutura do projeto
 echo "ESTRUTURA DO PROJETO" >> "$OUTPUT_FILE"
 echo "====================" >> "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
 
-# Lista de arquivos com caminhos absolutos
-declare -A ARQUIVOS=(
-    ["$PROJECT_ROOT/run.sh"]="[RAIZ]"
-    ["$PROJECT_ROOT/CMakeLists.txt"]="[RAIZ]"
-    ["$PROJECT_ROOT/doc/export.sh"]="[PASTA] doc"
-    ["$PROJECT_ROOT/include/estruturas.hpp"]="[PASTA] include"
-    ["$PROJECT_ROOT/include/includes.hpp"]="[PASTA] include"
-    ["$PROJECT_ROOT/include/main.hpp"]="[PASTA] include"
-    ["$PROJECT_ROOT/include/menu_criar.hpp"]="[PASTA] include"
-    ["$PROJECT_ROOT/include/menu_exibir.hpp"]="[PASTA] include"
-    ["$PROJECT_ROOT/include/menu_import_export.hpp"]="[PASTA] include"
-    ["$PROJECT_ROOT/include/menu_funcoes.hpp"]="[PASTA] include"
-    ["$PROJECT_ROOT/include/menu_principal.hpp"]="[PASTA] include"
-    ["$PROJECT_ROOT/include/processo.hpp"]="[PASTA] include"
-    ["$PROJECT_ROOT/src/main.cpp"]="[PASTA] src"
-    ["$PROJECT_ROOT/src/menu_criar.cpp"]="[PASTA] src"
-    ["$PROJECT_ROOT/src/menu_exibir.cpp"]="[PASTA] src"
-    ["$PROJECT_ROOT/src/menu_import_export.cpp"]="[PASTA] src"
-    ["$PROJECT_ROOT/src/menu_funcoes.cpp"]="[PASTA] src"
-    ["$PROJECT_ROOT/src/menu_principal.cpp"]="[PASTA] src"
-    ["$PROJECT_ROOT/src/processo.cpp"]="[PASTA] src"
-)
-
 TOTAL_ARQUIVOS=0
 declare -A CATEGORIAS_ADICIONADAS
 
+# Função para obter categoria do arquivo
+obter_categoria() {
+    local caminho="$1"
+    local pasta=$(dirname "${caminho#$PROJECT_ROOT/}")
+    
+    case "$pasta" in
+        ".") echo "[RAIZ]" ;;
+        "doc") echo "[PASTA] doc" ;;
+        "include") echo "[PASTA] include" ;;
+        "src") echo "[PASTA] src" ;;
+        *) echo "[PASTA] $pasta" ;;
+    esac
+}
+
 # Adicionar estrutura do projeto
-for CAMINHO in "${!ARQUIVOS[@]}"; do
-    CATEGORIA="${ARQUIVOS[$CAMINHO]}"
+for CAMINHO in "${ARQUIVOS_ENCONTRADOS[@]}"; do
+    CATEGORIA=$(obter_categoria "$CAMINHO")
     CAMINHO_RELATIVO="${CAMINHO#$PROJECT_ROOT/}"
     
     if [ -f "$CAMINHO" ]; then
@@ -79,9 +103,6 @@ for CAMINHO in "${!ARQUIVOS[@]}"; do
         NOME_ARQUIVO=$(basename "$CAMINHO_RELATIVO")
         echo "  --> $NOME_ARQUIVO" >> "$OUTPUT_FILE"
         ((TOTAL_ARQUIVOS++))
-        echo "✓ Encontrado: $CAMINHO_RELATIVO"
-    else
-        echo "✗ Não encontrado: $CAMINHO_RELATIVO"
     fi
 done
 
@@ -91,7 +112,7 @@ echo "=====================" >> "$OUTPUT_FILE"
 echo "" >> "$OUTPUT_FILE"
 
 # Adicionar conteúdo de cada arquivo
-for CAMINHO in "${!ARQUIVOS[@]}"; do
+for CAMINHO in "${ARQUIVOS_ENCONTRADOS[@]}"; do
     CAMINHO_RELATIVO="${CAMINHO#$PROJECT_ROOT/}"
     
     if [ -f "$CAMINHO" ]; then
