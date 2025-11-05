@@ -3,6 +3,33 @@
 Um sistema completo em C++ para gerenciamento e análise de árvores genealógicas,
 com interface interativa e suporte a múltiplas funcionalidades de parentesco.
 
+![Árvore Genealógica](./images/arvore-e-menu.png)
+
+![Import CSV](./images/arvore-csv.png)
+
+## Projeto Solicitado
+
+```txt
+Implementação de Arvore Genealógica com Estruturas de Dados
+
+- Objetivo:
+Implementar um sistema em C++ para representar e manipular uma árvore genealógica, aplicando estruturas de dados hierárquicas, como árvores, ou listas e filas.
+
+- Funcionalidades obrigatórias:
+Adicionar pessoa (nome, ano de nascimento, gênero).
+Definir relação entre duas pessoas (pai/mãe e filho).
+Exibir descendentes e ascendentes de uma pessoa.
+Listar toda a árvore a partir de um ancestral principal.
+Buscar pessoa por nome.
+
+- Funcionalidades opcionais:
+Exibir nível de parentesco entre duas pessoas (distância em nós).
+Contar o número de descendentes diretos e indiretos.
+Mostrar gerações separadas por nível.
+Gravar e carregar a árvore de um arquivo texto (opcional, não obrigatório).
+
+```
+
 ## 📋 Pré-requisitos
 
 ### Para Windows:
@@ -204,7 +231,7 @@ family_tree/
 
 - **Performance**: BFS bidirecional pode ser custoso para árvores muito grandes
 - **Memória**: Uso de múltiplas estruturas para diferentes visualizações
-- **Complexidade**: Alguns algoritmos O(n²) em worst-case
+- **Complexidade**: Alguns algoritmos O(n²)
 
 ### 🔄 Possíveis Melhorias
 
@@ -249,9 +276,35 @@ make
 ## 🎯 Casos de Uso Típicos
 
 - **Pesquisa Genealógica**: Construir e analisar linhagens familiares
-- **Estudos Acadêmicos**: Análise de padrões familiares e hereditaridade
+- **Estudos Acadêmicos**: Análise de padrões familiares e hereditariedade
 - **Preservação Histórica**: Documentação de árvores familiares complexas
 
 ---
 
 **Desenvolvido com C++17 | Suporte Multi-plataforma | Licença MIT**
+
+## 📚 Conhecimentos aprendidos
+
+- Estrutura de projeto C++: organização em diretórios src/, include/, dados/, e
+  uso de headers para separar interface (_.hpp) da implementação (_.cpp).
+- Como buildar com CMake: criar pasta de build, executar cmake .. e compilar com
+  make / mingw32-make; uso de targets e configuração multiplataforma.
+- Uso de headers: declarar estruturas, protótipos e interfaces nos headers e
+  incluir apenas o necessário para reduzir dependências e tempo de compilação.
+- STL e containers: uso de std::map para indexação por ID, std::vector para
+  listas, std::queue/std::stack para BFS/DFS e std::set para controle de
+  visitados.
+- Leitura/escrita de CSV: leitura sequencial para popular std::vector<Pessoa> e
+  escrita para persistência; tratamento de cabeçalho e parsing simples com
+  string streams.
+- Manipulação de strings: transformações para busca case-insensitive, conversão
+  UTF-8 e leitura segura de linhas/nomes.
+- Algoritmos aplicados: BFS para cálculo de gerações/parentesco, DFS iterativo
+  para contagem de descendentes e detecção de ciclos.
+- Validação e consistência: checagens de integridade (pais/conjuge existem,
+  ausência de auto-referência, diferenças de idade plausíveis).
+- Boas práticas: separação de responsabilidades, funções pequenas e legíveis,
+  mensagens claras ao usuário e tratamento de erros com early returns.
+- Considerações de portabilidade: configuração de console UTF-8, recomendações
+  de terminais no Windows (Git Bash/PowerShell) e uso de CMake para facilitar
+  compilação em diferentes SOs.

@@ -10,10 +10,10 @@ compile_vars.tmp
 *.out
 .vscode/*
 .idea/*
+*doc/*
 *.swp
 *.swo
 .DS_Store
 export.txt
 main-backup.cpp
 family_tree.exe
-*doc/
