@@ -1,26 +1,31 @@
-#include "../include/core/arvore.hpp"
-#include "../include/io/csv_handler.hpp"
-#include "../include/io/utf8_config.hpp"
-#include "../include/ui/menu.hpp"
-#include "../include/ui/impressao.hpp"
-#include "../include/utils/validacao.hpp"
-#include <iostream>
-#include <limits>
-
-using namespace std;
+#include "../include/main.hpp"
 
 int main() {
   // Configurar UTF-8 no console
   configurarUTF8();
 
-  cout << "=== SISTEMA DE ÁRVORE GENEALÓGICA ===" << endl;
+  map<int, Pessoa> arvore = configurarArvore();
+
+  // falha ao configurar, sair com código de erro
+  if (arvore.empty()) {
+    mostrarErro("Configure o arquivo dados/dados.csv que sua árvore carregará automaticamente.\nO cabeçalho deve ser:\nid,nome,genero,ano_nascimento,id_pai,id_mae,id_conjuge\n");
+  }
+
+  // Menu interativo para adicionar pessoas e relações
+  menuInterativo(arvore);
+
+  return 0;
+}
+
+map<int, Pessoa> configurarArvore() {
+  mostrarCabecalho();
 
   // Ler dados do CSV
   vector<Pessoa> pessoas = lerCSV("dados/dados.csv");
 
   if (pessoas.empty()) {
-    cout << "Erro: Nenhum dado encontrado ou arquivo vazio." << endl;
-    return 1;
+    mostrarErro("Nenhum dado encontrado ou arquivo vazio.");
+    return {};
   }
 
   cout << "Pessoas carregadas: " << pessoas.size() << endl;
@@ -33,16 +38,16 @@ int main() {
   encontrarRaiz(arvore, raiz_id);
 
   if (raiz_id == -1) {
-    cout << "Erro: Não foi possível encontrar a raiz da árvore." << endl;
-    return 1;
+    mostrarErro("Não foi possível encontrar a raiz da árvore.");
+    return {};
   }
 
   cout << "\nRaiz da árvore: " << arvore.at(raiz_id).nome << " (ID: " << raiz_id << ")" << endl;
 
   // Validar árvore
   if (!validarArvore(arvore)) {
-    cout << "Erro: Árvore genealógica inválida." << endl;
-    return 1;
+    mostrarErro("Árvore genealógica inválida.");
+    return {};
   }
 
   // Imprimir árvore
@@ -50,9 +55,13 @@ int main() {
   vector<bool> ultimos;
   imprimirArvore(arvore, raiz_id, 0, ultimos);
 
-  // Menu interativo para adicionar pessoas e relações
-  cout << "\n=== MODO INTERATIVO ===" << endl;
-  menuInterativo(arvore);
+  return arvore;
+}
 
-  return 0;
+void mostrarCabecalho() {
+  cout << "=== SISTEMA DE ÁRVORE GENEALÓGICA ===" << endl;
+}
+
+void mostrarErro(const string& msg) {
+  cout << "Erro: " << msg << endl;
 }

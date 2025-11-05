@@ -14,7 +14,7 @@ PROJECT_NAME="family_tree"
 
 # CONFIGURAÇÕES DE EXCLUSÃO - EDITAR CONFORME NECESSÁRIO
 # Pastas que serão completamente ignoradas (separadas por espaço)
-EXCLUIR_PASTAS="build .git .vscode .idea"
+EXCLUIR_PASTAS="build .git .vscode .idea doc"
 # Arquivos específicos para excluir (separados por espaço)
 EXCLUIR_ARQUIVOS="export.txt .gitignore README.md"
 # Extensões de arquivo para excluir (separadas por espaço)
