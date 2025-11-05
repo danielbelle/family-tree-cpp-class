@@ -1,10 +1,4 @@
 #include "../../include/io/csv_handler.hpp"
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include <map>
-
-using namespace std;
 
 vector<Pessoa> lerCSV(const string& filename) {
   vector<Pessoa> pessoas;
@@ -35,13 +29,14 @@ vector<Pessoa> lerCSV(const string& filename) {
       dados.push_back(token);
     }
 
-    if (dados.size() >= 6) {
+    if (dados.size() >= 7) {
       p.id = stoi(dados[0]);
       p.nome = dados[1];
       p.genero = dados[2][0];
-      p.id_pai = stoi(dados[3]);
-      p.id_mae = stoi(dados[4]);
-      p.id_conjuge = stoi(dados[5]);
+      p.ano_nascimento = stoi(dados[3]);
+      p.id_pai = stoi(dados[4]);
+      p.id_mae = stoi(dados[5]);
+      p.id_conjuge = stoi(dados[6]);
 
       pessoas.push_back(p);
     }
@@ -59,13 +54,14 @@ void salvarCSV(const map<int, Pessoa>& arvore, const string& filename) {
     return;
   }
 
-  // Escrever cabeçalho
-  arquivo << "id,nome,genero,id_pai,id_mae,id_conjuge" << endl;
+  // Escrever cabeçalho do CSV
+  arquivo << "id,nome,genero,ano_nascimento,id_pai,id_mae,id_conjuge" << endl;
 
   // Escrever dados
   for (const auto& par : arvore) {
     const Pessoa& p = par.second;
     arquivo << p.id << "," << p.nome << "," << p.genero << ","
+      << p.ano_nascimento << ","
       << p.id_pai << "," << p.id_mae << "," << p.id_conjuge << endl;
   }
 

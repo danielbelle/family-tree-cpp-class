@@ -1,7 +1,11 @@
-#ifndef ARVORE_HPP
-#define ARVORE_HPP
+#pragma once
 
+#include "../utils/validacao.hpp"
 #include "pessoa.hpp"
+#include <iostream>
+#include <queue>
+#include <set>
+#include <functional>
 #include <map>
 #include <vector>
 
@@ -20,5 +24,3 @@ void definirPais(map<int, Pessoa>& arvore, int id_filho);
 // Funções de cálculo de parentesco
 int calcularParentesco(const map<int, Pessoa>& arvore, int pessoa1_id, int pessoa2_id);
 int contarDescendentes(const map<int, Pessoa>& arvore, int pessoa_id);
-
-#endif

@@ -1,11 +1,4 @@
 #include "../../include/core/arvore.hpp"
-#include "../../include/utils/validacao.hpp"
-#include <iostream>
-#include <queue>
-#include <set>
-#include <functional>
-
-using namespace std;
 
 map<int, Pessoa> construirArvore(vector<Pessoa>& pessoas) {
   map<int, Pessoa> arvore;
@@ -85,6 +78,7 @@ bool validarArvore(const map<int, Pessoa>& arvore) {
         return false;
       }
     }
+
   }
 
   cout << "Árvore validada com sucesso!" << endl;
@@ -108,6 +102,7 @@ int obterProximoId(const map<int, Pessoa>& arvore) {
 }
 
 void adicionarPessoa(map<int, Pessoa>& arvore, const Pessoa& nova_pessoa) {
+
   // Criar uma cópia da pessoa com ID gerado automaticamente
   Pessoa pessoa_com_id = nova_pessoa;
   pessoa_com_id.id = obterProximoId(arvore);
@@ -136,12 +131,12 @@ void definirPais(map<int, Pessoa>& arvore, int id_filho) {
   }
 
   Pessoa& filho = arvore[id_filho];
-  cout << "\nDefinindo pais para: " << filho.nome << " (ID: " << id_filho << ")" << endl;
+  cout << "\nDefinindo pais para: " << filho.nome << " (ID: " << id_filho << ", Nasc: " << filho.ano_nascimento << ")" << endl;
 
   if (filho.id_pai > 0 && filho.id_mae > 0) {
     cout << "Esta pessoa já tem ambos os pais definidos!" << endl;
-    cout << "Pai: " << arvore[filho.id_pai].nome << " (ID: " << filho.id_pai << ")" << endl;
-    cout << "Mãe: " << arvore[filho.id_mae].nome << " (ID: " << filho.id_mae << ")" << endl;
+    cout << "Pai: " << arvore[filho.id_pai].nome << " (ID: " << filho.id_pai << ", Nasc: " << arvore[filho.id_pai].ano_nascimento << ")" << endl;
+    cout << "Mãe: " << arvore[filho.id_mae].nome << " (ID: " << filho.id_mae << ", Nasc: " << arvore[filho.id_mae].ano_nascimento << ")" << endl;
     return;
   }
 
@@ -155,11 +150,11 @@ void definirPais(map<int, Pessoa>& arvore, int id_filho) {
   }
 
   Pessoa& parente = arvore[id_parente];
-  cout << "Parente selecionado: " << parente.nome << " (" << parente.genero << ") [ID: " << id_parente << "]";
+  cout << "Parente selecionado: " << parente.nome << " (" << parente.genero << ", Nasc: " << parente.ano_nascimento << ") [ID: " << id_parente << "]";
 
   if (parente.id_conjuge > 0) {
     Pessoa& conjuge = arvore[parente.id_conjuge];
-    cout << " 💑 " << conjuge.nome << " (" << conjuge.genero << ")" << endl;
+    cout << " 💑 " << conjuge.nome << " (" << conjuge.genero << ", Nasc: " << conjuge.ano_nascimento << ")" << endl;
   }
   else {
     cout << " (sem cônjuge)" << endl;

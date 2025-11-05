@@ -1,13 +1,5 @@
 #include "../../include/ui/menu.hpp"
-#include "../../include/core/arvore.hpp"
-#include "../../include/io/csv_handler.hpp"
-#include "../../include/ui/impressao.hpp"
-#include "../../include/utils/busca.hpp"
-#include "../../include/utils/validacao.hpp"
-#include "../../include/io/utf8_config.hpp"
-#include <iostream>
 
-using namespace std;
 
 void adicionarPessoaInterativo(map<int, Pessoa>& arvore) {
   Pessoa nova;
@@ -17,6 +9,10 @@ void adicionarPessoaInterativo(map<int, Pessoa>& arvore) {
   nova.nome = lerStringUTF8();
 
   nova.genero = solicitarGeneroValido();
+
+  cout << "Ano de nascimento: ";
+  cin >> nova.ano_nascimento;
+
   nova.id_pai = 0;
   nova.id_mae = 0;
   nova.id_conjuge = 0;
@@ -26,6 +22,7 @@ void adicionarPessoaInterativo(map<int, Pessoa>& arvore) {
 
 void menuInterativo(map<int, Pessoa>& arvore) {
   int opcao;
+  string pastaArquivoCSV = "dados/dados.csv";
 
   do {
     cout << "\n=== MENU INTERATIVO ===" << endl;
@@ -48,60 +45,24 @@ void menuInterativo(map<int, Pessoa>& arvore) {
     case 1:
       adicionarPessoaInterativo(arvore);
       break;
-    case 2: {
-      int id_filho;
-      cout << "Digite o ID da pessoa que deseja definir os pais: ";
-      cin >> id_filho;
-      definirPais(arvore, id_filho);
+    case 2:
+      definirPaisParaPessoaCriada(arvore);
       break;
-    }
     case 3:
-      salvarCSV(arvore, "dados/dados.csv");
+      salvarCSV(arvore, pastaArquivoCSV);
       break;
-    case 4: {
-      int raiz_id;
-      encontrarRaiz(arvore, raiz_id);
-      vector<bool> ultimos;
-      cout << "\n=== ÁRVORE ATUAL ===" << endl;
-      imprimirArvore(arvore, raiz_id, 0, ultimos);
+    case 4:
+      verArvoreCompleta(arvore);
       break;
-    }
-    case 5: {
-      cout << "\n=== LISTA DE PESSOAS ===" << endl;
-      for (const auto& par : arvore) {
-        const Pessoa& p = par.second;
-        cout << "ID: " << p.id << " | " << p.nome << " (" << p.genero << ")";
-        if (p.id_pai > 0) cout << " | Pai: " << p.id_pai;
-        if (p.id_mae > 0) cout << " | Mãe: " << p.id_mae;
-        if (p.id_conjuge > 0) cout << " | Cônjuge: " << p.id_conjuge;
-        cout << " | Filhos: " << p.filhos.size();
-        cout << endl;
-      }
+    case 5:
+      listarTodasPessoas(arvore);
       break;
-    }
     case 6:
       exibirAscendentesEDescendentes(arvore);
       break;
-    case 7: {
-      string nomeBusca = "";
-      cout << "Digite o nome: ";
-      nomeBusca = lerStringUTF8();
-
-      int pessoa_id = buscarPessoaPorNome(arvore, nomeBusca);
-
-      if (pessoa_id == -1) {
-        cout << "Erro: Pessoa com nome '" << nomeBusca << "' não encontrada!" << endl;
-      }
-      else {
-        const Pessoa& p = arvore.at(pessoa_id);
-        cout << "Pessoa encontrada: " << p.nome << " (ID: " << pessoa_id << ") Gênero: " << p.genero << endl;
-        cout << "Pai: " << (p.id_pai > 0 ? arvore.at(p.id_pai).nome : "Não definido") << endl;
-        cout << "Mãe: " << (p.id_mae > 0 ? arvore.at(p.id_mae).nome : "Não definido") << endl;
-        cout << "Cônjuge: " << (p.id_conjuge > 0 ? arvore.at(p.id_conjuge).nome : "Não definido") << endl;
-        cout << "Filhos: " << p.filhos.size() << endl;
-      }
+    case 7:
+      localizarPessoaPorNome(arvore);
       break;
-    }
     case 8:
       listarArvoreDesdeAncestral(arvore);
       break;
@@ -121,4 +82,53 @@ void menuInterativo(map<int, Pessoa>& arvore) {
       cout << "Opção inválida!" << endl;
     }
   } while (opcao != 0);
+}
+
+void definirPaisParaPessoaCriada(map<int, Pessoa>& arvore) {
+  int id_filho;
+  cout << "Digite o ID da pessoa que deseja definir os pais: ";
+  cin >> id_filho;
+  definirPais(arvore, id_filho);
+}
+
+void verArvoreCompleta(map<int, Pessoa>& arvore) {
+  int raiz_id;
+  encontrarRaiz(arvore, raiz_id);
+  vector<bool> ultimos;
+  cout << "\n=== ÁRVORE ATUAL ===" << endl;
+  imprimirArvore(arvore, raiz_id, 0, ultimos);
+}
+
+void listarTodasPessoas(map<int, Pessoa>& arvore) {
+
+  cout << "\n=== LISTA DE PESSOAS ===" << endl;
+  for (const auto& par : arvore) {
+    const Pessoa& p = par.second;
+    cout << "ID: " << p.id << " | " << p.nome << " (" << p.genero << ") | Nasc: " << p.ano_nascimento;
+    if (p.id_pai > 0) cout << " | Pai: " << p.id_pai;
+    if (p.id_mae > 0) cout << " | Mãe: " << p.id_mae;
+    if (p.id_conjuge > 0) cout << " | Cônjuge: " << p.id_conjuge;
+    cout << " | Filhos: " << p.filhos.size();
+    cout << endl;
+  }
+}
+
+void localizarPessoaPorNome(map<int, Pessoa>& arvore) {
+  string nomeBusca = "";
+  cout << "Digite o nome: ";
+  nomeBusca = lerStringUTF8();
+
+  int pessoa_id = buscarPessoaPorNome(arvore, nomeBusca);
+
+  if (pessoa_id == -1) {
+    cout << "Erro: Pessoa com nome '" << nomeBusca << "' não encontrada!" << endl;
+  }
+  else {
+    const Pessoa& p = arvore.at(pessoa_id);
+    cout << "Pessoa encontrada: " << p.nome << " (ID: " << pessoa_id << ") Gênero: " << p.genero << " Nasc: " << p.ano_nascimento << endl;
+    cout << "Pai: " << (p.id_pai > 0 ? arvore.at(p.id_pai).nome : "Não definido") << endl;
+    cout << "Mãe: " << (p.id_mae > 0 ? arvore.at(p.id_mae).nome : "Não definido") << endl;
+    cout << "Cônjuge: " << (p.id_conjuge > 0 ? arvore.at(p.id_conjuge).nome : "Não definido") << endl;
+    cout << "Filhos: " << p.filhos.size() << endl;
+  }
 }

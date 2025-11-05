@@ -1,12 +1,4 @@
 #include "../../include/ui/impressao.hpp"
-#include "../../include/core/arvore.hpp"
-#include "../../include/utils/busca.hpp"
-#include "../../include/utils/validacao.hpp"
-#include <iostream>
-#include <queue>
-#include <functional>
-
-using namespace std;
 
 // Função unificada para imprimir árvore/descendentes
 void imprimirArvore(const map<int, Pessoa>& arvore, int pessoa_id, int nivel, vector<bool>& ultimos) {
@@ -26,13 +18,13 @@ void imprimirArvore(const map<int, Pessoa>& arvore, int pessoa_id, int nivel, ve
     }
   }
 
-  // Imprime a pessoa
-  cout << p.nome << " (" << p.genero << ") [ID: " << p.id << "]";
+  // Imprime a pessoa COM ANO DE NASCIMENTO
+  cout << p.nome << " (" << p.genero << ", nasc. " << p.ano_nascimento << ") [ID: " << p.id << "]";
 
   // Se tem conjuge, imprime também
   if (p.id_conjuge > 0 && pessoaExiste(arvore, p.id_conjuge)) {
     const Pessoa& conjuge = arvore.at(p.id_conjuge);
-    cout << " 💑 " << conjuge.nome << " (" << conjuge.genero << ") [ID: " << conjuge.id << "]";
+    cout << " 💑 " << conjuge.nome << " (" << conjuge.genero << ", nasc. " << conjuge.ano_nascimento << ") [ID: " << conjuge.id << "]";
   }
   cout << endl;
 
@@ -69,7 +61,7 @@ void exibirLinhaAscendencia(const map<int, Pessoa>& arvore, int pessoa_id) {
     cout << " -> ";
   }
 
-  cout << p.nome << " (" << p.genero << ")";
+  cout << p.nome << " (" << p.genero << ", nasc. " << p.ano_nascimento << ")";
 }
 
 void exibirGeracoesPorNivel(const map<int, Pessoa>& arvore, int pessoa_id) {
@@ -92,11 +84,11 @@ void exibirGeracoesPorNivel(const map<int, Pessoa>& arvore, int pessoa_id) {
       cout << "\n--- GERAÇÃO " << nivel << " ---" << endl;
     }
 
-    // Imprime a pessoa
-    cout << "  " << p.nome << " (" << p.genero << ") [ID: " << p.id << "]";
+    // Imprime a pessoa COM ANO DE NASCIMENTO
+    cout << "  " << p.nome << " (" << p.genero << ", nasc. " << p.ano_nascimento << ") [ID: " << p.id << "]";
     if (p.id_conjuge > 0 && pessoaExiste(arvore, p.id_conjuge)) {
       const Pessoa& conjuge = arvore.at(p.id_conjuge);
-      cout << " 💑 " << conjuge.nome;
+      cout << " 💑 " << conjuge.nome << " (nasc. " << conjuge.ano_nascimento << ")";
     }
     cout << endl;
 
@@ -114,11 +106,11 @@ void listarArvoreDesdeAncestral(map<int, Pessoa>& arvore) {
   const Pessoa& ancestral = arvore.at(pessoa_id);
 
   cout << "\n=== ÁRVORE COMPLETA DESDE " << ancestral.nome << " ===" << endl;
-  cout << "Ancestral: " << ancestral.nome << " (" << ancestral.genero << ") [ID: " << ancestral.id << "]" << endl;
+  cout << "Ancestral: " << ancestral.nome << " (" << ancestral.genero << ", nasc. " << ancestral.ano_nascimento << ") [ID: " << ancestral.id << "]" << endl;
 
   if (ancestral.id_conjuge > 0 && pessoaExiste(arvore, ancestral.id_conjuge)) {
     const Pessoa& conjuge = arvore.at(ancestral.id_conjuge);
-    cout << "Cônjuge: " << conjuge.nome << " (" << conjuge.genero << ") [ID: " << conjuge.id << "]" << endl;
+    cout << "Cônjuge: " << conjuge.nome << " (" << conjuge.genero << ", nasc. " << conjuge.ano_nascimento << ") [ID: " << conjuge.id << "]" << endl;
   }
 
   cout << "=====================================" << endl;
@@ -129,8 +121,8 @@ void listarArvoreDesdeAncestral(map<int, Pessoa>& arvore) {
   // Estatísticas
   int total_descendentes = contarDescendentes(arvore, pessoa_id);
   cout << "\n--- ESTATÍSTICAS DA ÁRVORE ---" << endl;
-  cout << "Ancestral principal: " << ancestral.nome << endl;
-  cout << "Total de descendentes: " << (total_descendentes - 1) << endl;
+  cout << "Ancestral principal: " << ancestral.nome << " (nasc. " << ancestral.ano_nascimento << ")" << endl;
+  cout << "Total de descendentes: " << (total_descendentes > 0 ? (total_descendentes - 1) : 0) << endl;
   cout << "Filhos diretos: " << ancestral.filhos.size() << endl;
 }
 
@@ -165,7 +157,7 @@ void exibirAscendentesEDescendentes(map<int, Pessoa>& arvore) {
 
   // Estatísticas
   cout << "\n--- ESTATÍSTICAS ---" << endl;
-  cout << "Pessoa: " << pessoa.nome << " (" << pessoa.genero << ") [ID: " << pessoa.id << "]" << endl;
+  cout << "Pessoa: " << pessoa.nome << " (" << pessoa.genero << ", nasc. " << pessoa.ano_nascimento << ") [ID: " << pessoa.id << "]" << endl;
   cout << "Número de descendentes diretos: " << pessoa.filhos.size() << endl;
 }
 
@@ -186,8 +178,8 @@ void exibirNivelParentesco(map<int, Pessoa>& arvore) {
   int nivel = calcularParentesco(arvore, pessoa1_id, pessoa2_id);
 
   cout << "\n=== RESULTADO ===" << endl;
-  cout << "Pessoa 1: " << p1.nome << " (ID: " << p1.id << ")" << endl;
-  cout << "Pessoa 2: " << p2.nome << " (ID: " << p2.id << ")" << endl;
+  cout << "Pessoa 1: " << p1.nome << " (ID: " << p1.id << ", nasc. " << p1.ano_nascimento << ")" << endl;
+  cout << "Pessoa 2: " << p2.nome << " (ID: " << p2.id << ", nasc. " << p2.ano_nascimento << ")" << endl;
 
   if (nivel == -1) {
     cout << "❌ Não há parentesco entre as duas pessoas." << endl;
@@ -237,7 +229,7 @@ void exibirContagemDescendentes(map<int, Pessoa>& arvore) {
   int filhos_indiretos = total_descendentes - filhos_diretos;
 
   cout << "\n=== RESULTADO ===" << endl;
-  cout << "Pessoa: " << pessoa.nome << " (ID: " << pessoa.id << ")" << endl;
+  cout << "Pessoa: " << pessoa.nome << " (ID: " << pessoa.id << ", nasc. " << pessoa.ano_nascimento << ")" << endl;
   cout << "📊 ESTATÍSTICAS DE DESCENDENTES:" << endl;
   cout << "   • Filhos diretos: " << filhos_diretos << endl;
   cout << "   • Descendentes indiretos: " << filhos_indiretos << endl;
@@ -248,7 +240,7 @@ void exibirContagemDescendentes(map<int, Pessoa>& arvore) {
     for (int filho_id : pessoa.filhos) {
       const Pessoa& filho = arvore.at(filho_id);
       int netos = contarDescendentes(arvore, filho_id);
-      cout << "   • " << filho.nome << " (ID: " << filho.id << ")";
+      cout << "   • " << filho.nome << " (ID: " << filho.id << ", nasc. " << filho.ano_nascimento << ")";
       if (netos > 0) {
         cout << " → " << netos << " descendente(s)";
       }
@@ -266,11 +258,11 @@ void exibirGeracoesSeparadas(map<int, Pessoa>& arvore) {
   const Pessoa& pessoa = arvore.at(pessoa_id);
 
   cout << "\n=== GERAÇÕES A PARTIR DE " << pessoa.nome << " ===" << endl;
-  cout << "Ancestral: " << pessoa.nome << " (" << pessoa.genero << ") [ID: " << pessoa.id << "]" << endl;
+  cout << "Ancestral: " << pessoa.nome << " (" << pessoa.genero << ", nasc. " << pessoa.ano_nascimento << ") [ID: " << pessoa.id << "]" << endl;
 
   if (pessoa.id_conjuge > 0 && pessoaExiste(arvore, pessoa.id_conjuge)) {
     const Pessoa& conjuge = arvore.at(pessoa.id_conjuge);
-    cout << "Cônjuge: " << conjuge.nome << " (" << conjuge.genero << ") [ID: " << conjuge.id << "]" << endl;
+    cout << "Cônjuge: " << conjuge.nome << " (" << conjuge.genero << ", nasc. " << conjuge.ano_nascimento << ") [ID: " << conjuge.id << "]" << endl;
   }
 
   cout << "=====================================" << endl;

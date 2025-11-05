@@ -1,7 +1,12 @@
-#ifndef IMPRESSAO_HPP
-#define IMPRESSAO_HPP
+#pragma once
 
 #include "../core/pessoa.hpp"
+#include "../include/core/arvore.hpp"
+#include "../include/utils/busca.hpp"
+#include "../include/utils/validacao.hpp"
+#include <iostream>
+#include <queue>
+#include <functional>
 #include <map>
 #include <vector>
 
@@ -18,5 +23,3 @@ void exibirAscendentesEDescendentes(map<int, Pessoa>& arvore);
 void exibirNivelParentesco(map<int, Pessoa>& arvore);
 void exibirContagemDescendentes(map<int, Pessoa>& arvore);
 void exibirGeracoesSeparadas(map<int, Pessoa>& arvore);
-
-#endif

@@ -1,11 +1,4 @@
 #include "../../include/utils/validacao.hpp"
-#include "../../include/core/pessoa.hpp"
-#include <algorithm>
-#include <iostream>
-#include <map>
-#include <vector>
-
-using namespace std;
 
 bool validarGenero(char genero) {
   return genero == 'M' || genero == 'F';

@@ -1,5 +1,4 @@
-#ifndef PESSOA_HPP
-#define PESSOA_HPP
+#pragma once
 
 #include <vector>
 #include <string>
@@ -11,10 +10,9 @@ struct Pessoa {
   int id;
   string nome;
   char genero;
+  int ano_nascimento;
   int id_pai;
   int id_mae;
   int id_conjuge;
   vector<int> filhos;
 };
-
-#endif

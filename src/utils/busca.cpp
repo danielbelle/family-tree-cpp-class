@@ -1,10 +1,4 @@
 #include "../../include/utils/busca.hpp"
-#include "../../include/io/utf8_config.hpp"
-#include "../../include/utils/validacao.hpp"
-#include <algorithm>
-#include <iostream>
-
-using namespace std;
 
 int buscarPessoaPorNome(const map<int, Pessoa>& arvore, const string& nome) {
   // Converter nome para minúsculas para busca case-insensitive

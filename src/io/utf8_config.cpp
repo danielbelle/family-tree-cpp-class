@@ -1,7 +1,4 @@
 #include "../../include/io/utf8_config.hpp"
-#include <iostream>
-#include <limits>
-#include <locale>
 
 // Inclusão condicional segura para Windows
 #if defined(_WIN32) || defined(_WIN64)
