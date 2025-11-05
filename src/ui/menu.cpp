@@ -1,6 +1,96 @@
 #include "../../include/ui/menu.hpp"
 
 
+
+// Array de tópicos do menu usando structures
+vector<TopicoMenu> menus = {
+{
+  "👥 GESTÃO DE PESSOAS",
+  {
+    {"Adicionar nova pessoa", adicionarPessoaInterativo},
+    {"Definir pais para pessoa", definirPaisParaPessoaCriada},
+    {"Buscar pessoa por nome", localizarPessoaPorNome},
+    {"Listar todas pessoas", listarTodasPessoas}
+  }
+},
+  {
+    "🌳 VISUALIZAÇÃO DA ÁRVORE",
+    {
+      {"Ver árvore completa", verArvoreCompleta},
+      {"Listar árvore desde ancestral", listarArvoreDesdeAncestral},
+      {"Exibir ascendentes e descendentes", exibirAscendentesEDescendentes},
+      {"Exibir gerações por nível", exibirGeracoesSeparadas}
+    }
+  },
+  {
+    "📊 ANÁLISE E ESTATÍSTICAS",
+    {
+      {"Nível de parentesco", exibirNivelParentesco},
+      {"Contar descendentes", exibirContagemDescendentes},
+      {"Estatísticas avançadas", exibirEstatisticasAvancadas},
+      {"Validar inconsistências", [](map<int, Pessoa>& arvore) {
+        validarInconsistencias(arvore);
+      }}
+    }
+  },
+  {
+    "💾 ARMAZENAMENTO",
+    {
+      {"Salvar alterações no CSV", [](map<int, Pessoa>& arvore) {
+        salvarCSV(arvore, "dados/dados.csv");
+      }}
+    }
+  }
+};
+
+/**
+ * Exibe menu secundário para um tópico específico
+ */
+void exibirMenuSecundario(map<int, Pessoa>& arvore, size_t topico_idx) {
+  int opcao;
+  const TopicoMenu& topico = menus[topico_idx];
+
+  do {
+    cout << "\n=== " << topico.nome << " ===" << endl;
+    for (size_t i = 0; i < topico.opcoes.size(); i++) {
+      cout << i + 1 << ". " << topico.opcoes[i].descricao << endl;
+    }
+    cout << "0. Voltar ao menu principal\nEscolha: ";
+    cin >> opcao;
+
+    if (opcao > 0 && static_cast<size_t>(opcao) <= topico.opcoes.size()) {
+      topico.opcoes[opcao - 1].acao(arvore);
+    }
+    else if (opcao != 0) {
+      cout << "❌ Opção inválida!" << endl;
+    }
+  } while (opcao != 0);
+}
+
+/**
+ * Menu interativo inteligente com structures
+ */
+void menuInterativo(map<int, Pessoa>& arvore) {
+  int opcao;
+  do {
+    cout << "\n=== 🏠 MENU PRINCIPAL ===" << endl;
+    for (size_t i = 0; i < menus.size(); i++) {
+      cout << i + 1 << ". " << menus[i].nome << endl;
+    }
+    cout << "0. Sair\nEscolha: ";
+    cin >> opcao;
+
+    if (opcao > 0 && static_cast<size_t>(opcao) <= menus.size()) {
+      exibirMenuSecundario(arvore, opcao - 1);
+    }
+    else if (opcao != 0) {
+      cout << "❌ Opção inválida!" << endl;
+    }
+  } while (opcao != 0);
+
+  cout << "👋 Saindo do sistema..." << endl;
+}
+
 void adicionarPessoaInterativo(map<int, Pessoa>& arvore) {
   Pessoa nova;
   nova.id = 0;
@@ -20,70 +110,6 @@ void adicionarPessoaInterativo(map<int, Pessoa>& arvore) {
   adicionarPessoa(arvore, nova);
 }
 
-void menuInterativo(map<int, Pessoa>& arvore) {
-  int opcao;
-  string pastaArquivoCSV = "dados/dados.csv";
-
-  do {
-    cout << "\n=== MENU INTERATIVO ===" << endl;
-    cout << "1. Adicionar nova pessoa" << endl;
-    cout << "2. Definir pais para uma pessoa" << endl;
-    cout << "3. Salvar alterações no CSV" << endl;
-    cout << "4. Visualizar árvore atual" << endl;
-    cout << "5. Listar todas as pessoas" << endl;
-    cout << "6. Exibir ascendentes e descendentes" << endl;
-    cout << "7. Buscar pessoa por nome" << endl;
-    cout << "8. Listar árvore desde ancestral" << endl;
-    cout << "9. Nível de parentesco entre duas pessoas" << endl;
-    cout << "10. Contar descendentes de uma pessoa" << endl;
-    cout << "11. Exibir gerações por nível" << endl;
-    cout << "0. Sair" << endl;
-    cout << "Escolha: ";
-    cin >> opcao;
-
-    switch (opcao) {
-    case 1:
-      adicionarPessoaInterativo(arvore);
-      break;
-    case 2:
-      definirPaisParaPessoaCriada(arvore);
-      break;
-    case 3:
-      salvarCSV(arvore, pastaArquivoCSV);
-      break;
-    case 4:
-      verArvoreCompleta(arvore);
-      break;
-    case 5:
-      listarTodasPessoas(arvore);
-      break;
-    case 6:
-      exibirAscendentesEDescendentes(arvore);
-      break;
-    case 7:
-      localizarPessoaPorNome(arvore);
-      break;
-    case 8:
-      listarArvoreDesdeAncestral(arvore);
-      break;
-    case 9:
-      exibirNivelParentesco(arvore);
-      break;
-    case 10:
-      exibirContagemDescendentes(arvore);
-      break;
-    case 11:
-      exibirGeracoesSeparadas(arvore);
-      break;
-    case 0:
-      cout << "Saindo do menu interativo..." << endl;
-      break;
-    default:
-      cout << "Opção inválida!" << endl;
-    }
-  } while (opcao != 0);
-}
-
 void definirPaisParaPessoaCriada(map<int, Pessoa>& arvore) {
   int id_filho;
   cout << "Digite o ID da pessoa que deseja definir os pais: ";
@@ -94,13 +120,11 @@ void definirPaisParaPessoaCriada(map<int, Pessoa>& arvore) {
 void verArvoreCompleta(map<int, Pessoa>& arvore) {
   int raiz_id;
   encontrarRaiz(arvore, raiz_id);
-  vector<bool> ultimos;
   cout << "\n=== ÁRVORE ATUAL ===" << endl;
-  imprimirArvore(arvore, raiz_id, 0, ultimos);
+  imprimirArvoreIterativa(arvore, raiz_id);
 }
 
 void listarTodasPessoas(map<int, Pessoa>& arvore) {
-
   cout << "\n=== LISTA DE PESSOAS ===" << endl;
   for (const auto& par : arvore) {
     const Pessoa& p = par.second;

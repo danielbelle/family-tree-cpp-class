@@ -9,8 +9,22 @@
 #include "../include/io/utf8_config.hpp"
 #include <iostream>
 #include <map>
+#include <functional>
+#include <vector>
 
 using namespace std;
+
+// Structure para representar uma opção de menu
+struct OpcaoMenu {
+  string descricao;
+  function<void(map<int, Pessoa>&)> acao;
+};
+
+// Structure para representar um tópico do menu
+struct TopicoMenu {
+  string nome;
+  vector<OpcaoMenu> opcoes;
+};
 
 // Sistema de menu interativo
 void menuInterativo(map<int, Pessoa>& arvore);
