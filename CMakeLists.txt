@@ -20,10 +20,17 @@ endif()
 
 set(SOURCES
     src/main.cpp
+    src/core/arvore.cpp
+    src/io/csv_handler.cpp
+    src/io/utf8_config.cpp
+    src/ui/menu.cpp
+    src/ui/impressao.cpp
+    src/utils/validacao.cpp
+    src/utils/busca.cpp
 )
 
 add_executable(family-tree ${SOURCES})
-target_include_directories(family-tree PRIVATE src)
+target_include_directories(family-tree PRIVATE include)
 
 # Forçar codificação UTF-8 no GCC / Clang
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")

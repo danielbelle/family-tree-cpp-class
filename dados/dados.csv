@@ -1,31 +1,27 @@
-id,nome,genero,id_pai,id_mae,id_conjuge
-1,João Silva,M,0,0,2
-2,Maria Santos,F,0,0,1
-3,Pedro Silva,M,1,2,4
-4,Ana Costa,F,0,0,3
-5,Carlos Silva,M,1,2,6
-6,Beatriz Oliveira,F,0,0,5
-7,Julia Silva,F,1,2,8
-8,Rafael Pereira,M,0,0,7
-9,Lucas Costa,M,3,4,10
-10,Isabela Rodrigues,F,0,0,9
-11,Sofia Costa,F,3,4,12
-12,Mateus Almeida,M,0,0,11
-13,Gabriel Silva,M,5,6,0
-14,Larissa Silva,F,5,6,15
-15,Diego Souza,M,0,0,14
-16,Fernando Costa,M,9,10,17
-17,Camila Lima,F,0,0,16
-18,Manuela Costa,F,9,10,0
-19,Arthur Almeida,M,11,12,0
-20,Helena Almeida,F,11,12,0
-21,Enzo Souza,M,14,15,0
-22,Valentina Souza,F,14,15,0
-23,Leonardo Lima,M,16,17,0
-24,Lorena Lima,F,16,17,0
-25,Heitor Costa,M,9,10,0
-26,Laura Costa,F,9,10,0
-27,Daniel,M,5,6,0
-28,Carlita,F,27,0,0
-29,larica,M,3,4,0
-30,João,M,0,28,0
+id,nome,genero,ano_nascimento,id_pai,id_mae,id_conjuge
+1,João Silva,M,1950,0,0,2
+2,Maria Santos,F,1952,0,0,1
+3,Pedro Silva,M,1975,1,2,4
+4,Ana Costa,F,1977,0,0,3
+5,Carlos Silva,M,1978,1,2,6
+6,Beatriz Oliveira,F,1980,0,0,5
+7,Julia Silva,F,1982,1,2,8
+8,Rafael Pereira,M,1981,0,0,7
+9,Lucas Costa,M,2000,3,4,10
+10,Isabela Rodrigues,F,2002,0,0,9
+11,Sofia Costa,F,2003,3,4,12
+12,Mateus Almeida,M,2001,0,0,11
+13,Gabriel Silva,M,2005,5,6,0
+14,Larissa Silva,F,2007,5,6,15
+15,Diego Souza,M,2006,0,0,14
+16,Fernando Costa,M,2020,9,10,17
+17,Camila Lima,F,2022,0,0,16
+18,Manuela Costa,F,2024,9,10,0
+19,Arthur Almeida,M,2024,11,12,0
+20,Helena Almeida,F,2023,11,12,0
+21,Enzo Souza,M,2025,14,15,0
+22,Valentina Souza,F,2025,14,15,0
+23,Leonardo Lima,M,2025,16,17,0
+24,Lorena Lima,F,2025,16,17,0
+25,Heitor Costa,M,2022,9,10,0
+26,Laura Costa,F,2023,9,10,0
