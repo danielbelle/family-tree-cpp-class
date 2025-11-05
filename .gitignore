@@ -16,4 +16,4 @@ compile_vars.tmp
 export.txt
 main-backup.cpp
 family_tree.exe
-doc/*
+*doc/

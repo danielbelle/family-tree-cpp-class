@@ -8,8 +8,15 @@
 #include <functional>
 #include <map>
 #include <vector>
+#include <stack>
 
 using namespace std;
+
+// Estrutura para estatísticas avançadas
+struct EstatisticasArvore {
+  int total_pessoas;
+  int geracoes;
+};
 
 // Funções principais de construção e manipulação da árvore
 map<int, Pessoa> construirArvore(vector<Pessoa>& pessoas);
@@ -24,3 +31,6 @@ void definirPais(map<int, Pessoa>& arvore, int id_filho);
 // Funções de cálculo de parentesco
 int calcularParentesco(const map<int, Pessoa>& arvore, int pessoa1_id, int pessoa2_id);
 int contarDescendentes(const map<int, Pessoa>& arvore, int pessoa_id);
+
+// Funções de análise avançada
+EstatisticasArvore calcularEstatisticas(const map<int, Pessoa>& arvore);
