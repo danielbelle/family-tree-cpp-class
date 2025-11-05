@@ -29,7 +29,8 @@ int buscarPessoaInterativo(const map<int, Pessoa>& arvore) {
 
   int pessoa_id = -1;
 
-  if (opcao_busca == 1) {
+  switch (opcao_busca) {
+  case 1: {
     cout << "Digite o ID: ";
     cin >> pessoa_id;
 
@@ -37,8 +38,9 @@ int buscarPessoaInterativo(const map<int, Pessoa>& arvore) {
       cout << "Erro: Pessoa com ID " << pessoa_id << " não encontrada!" << endl;
       return -1;
     }
+    break;
   }
-  else if (opcao_busca == 2) {
+  case 2: {
     string nome;
     cout << "Digite o nome: ";
     nome = lerStringUTF8();
@@ -49,8 +51,9 @@ int buscarPessoaInterativo(const map<int, Pessoa>& arvore) {
       cout << "Erro: Pessoa com nome '" << nome << "' não encontrada!" << endl;
       return -1;
     }
+    break;
   }
-  else {
+  default:
     cout << "Opção inválida!" << endl;
     return -1;
   }
